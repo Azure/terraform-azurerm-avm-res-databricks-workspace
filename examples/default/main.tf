@@ -20,6 +20,7 @@ provider "azurerm" {
 ## Section to provide a random Azure region for the resource group
 # This allows us to randomize the region for the resource group.
 module "regions" {
+  # checkov:skip=CKV_TF_1
   source  = "Azure/regions/azurerm"
   version = ">= 0.3.0"
 }
@@ -33,6 +34,7 @@ resource "random_integer" "region_index" {
 
 # This ensures we have unique CAF compliant names for our resources.
 module "naming" {
+  # checkov:skip=CKV_TF_1
   source  = "Azure/naming/azurerm"
   version = ">= 0.3.0"
 }
@@ -43,15 +45,12 @@ resource "azurerm_resource_group" "this" {
   location = module.regions.regions[random_integer.region_index.result].name
 }
 
-# This is the module call
-# Do not specify location here due to the randomization above.
-# Leaving location as `null` will cause the module to use the resource group location
-# with a data source.
-module "test" {
-  source = "../../"
-  # source             = "Azure/avm-<res/ptn>-<name>/azurerm"
-  # ...
-  enable_telemetry    = var.enable_telemetry # see variables.tf
-  name                = ""                   # TODO update with module.naming.<RESOURCE_TYPE>.name_unique
+module "databricks" {
+  source = "../.."
+
+  enable_telemetry    = var.enable_telemetry
+  name                = module.naming.databricks_workspace.name_unique
   resource_group_name = azurerm_resource_group.this.name
+  location            = azurerm_resource_group.this.location
+  sku                 = "standard"
 }
