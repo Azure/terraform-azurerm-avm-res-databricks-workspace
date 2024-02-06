@@ -276,6 +276,28 @@ A map of diagnostic settings to create on the storage account. The map key is de
 DESCRIPTION
 }
 
+variable "lock" {
+  type = object({
+    name = optional(string, null)
+    kind = optional(string, "None")
+  })
+  description = "The lock level to apply. Default is `None`. Possible values are `None`, `CanNotDelete`, and `ReadOnly`."
+  default     = {}
+  nullable    = false
+  validation {
+    condition     = contains(["CanNotDelete", "ReadOnly", "None"], var.lock.kind)
+    error_message = "The lock level must be one of: 'None', 'CanNotDelete', or 'ReadOnly'."
+  }
+}
+
+variable "managed_identities" {
+  type = object({
+    system_assigned            = optional(bool, false)
+    user_assigned_resource_ids = optional(set(string), [])
+  })
+  description = "Managed identities to be created for the resource."
+  default     = {}
+}
 
 variable "private_endpoints" {
   type = map(object({
@@ -371,35 +393,6 @@ A map of virtual network peering configurations. The map key is deliberately arb
 DESCRIPTION
 }
 
-variable "access_connector" {
-  type = map(object({
-    name                = string
-    resource_group_name = optional(string, null)
-    location            = optional(string, null)
-    identity = optional(object({
-      type         = string
-      identity_ids = optional(list(string))
-    }))
-    tags = optional(map(string))
-  }))
-  default     = {}
-  description = <<DESCRIPTION
-  Configuration options for the Databricks Access Connector resource. This map has the following attributes:
-  
-Configuration options for the Databricks Access Connector resource. This map includes the following attributes:
-
-- `name` (Required): Specifies the name of the Databricks Access Connector resource. Changing this forces a new resource to be created.
-- `resource_group_name` (Optional): The name of the Resource Group in which the Databricks Access Connector should exist. Defaults to the resource group of the databricks instance.
-- `location` (Optional): Specifies the supported Azure location where the resource has to be created. Defaults to the location of the databricks instance.
-- `identity` (Optional): An identity block. This block supports the following:
-  - `type` (Required): Specifies the type of Managed Service Identity that should be configured on the Databricks Access Connector. Possible values include SystemAssigned or UserAssigned.
-  - `identity_ids` (Optional): Specifies a list of User Assigned Managed Identity IDs to be assigned to the Databricks Access Connector. Only one User Assigned Managed Identity ID is supported per Databricks Access Connector resource. Note: identity_ids are required when type is set to UserAssigned.
-- `tags` (Optional): A mapping of tags to assign to the resource.
-  DESCRIPTION
-}
-
-
-# tflint-ignore: terraform_unused_declarations
 variable "tags" {
   type        = map(any)
   description = "The map of tags to be applied to the resource"
