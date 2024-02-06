@@ -10,15 +10,17 @@ The following requirements are needed by this module:
 
 - <a name="requirement_terraform"></a> [terraform](#requirement\_terraform) (>= 1.6.0)
 
-- <a name="requirement_azurerm"></a> [azurerm](#requirement\_azurerm) (>= 3.71.0, < 4.0)
+- <a name="requirement_azurerm"></a> [azurerm](#requirement\_azurerm) (>= 3.71.0)
+
+- <a name="requirement_random"></a> [random](#requirement\_random) (>= 3.5.0)
 
 ## Providers
 
 The following providers are used by this module:
 
-- <a name="provider_azurerm"></a> [azurerm](#provider\_azurerm) (>= 3.71.0, < 4.0)
+- <a name="provider_azurerm"></a> [azurerm](#provider\_azurerm) (>= 3.71.0)
 
-- <a name="provider_random"></a> [random](#provider\_random)
+- <a name="provider_random"></a> [random](#provider\_random) (>= 3.5.0)
 
 ## Resources
 
@@ -35,17 +37,12 @@ The following resources are used by this module:
 - [azurerm_resource_group_template_deployment.telemetry](https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/resources/resource_group_template_deployment) (resource)
 - [azurerm_role_assignment.this](https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/resources/role_assignment) (resource)
 - [random_id.telem](https://registry.terraform.io/providers/hashicorp/random/latest/docs/resources/id) (resource)
+- [azurerm_resource_group.parent](https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/data-sources/resource_group) (data source)
 
 <!-- markdownlint-disable MD013 -->
 ## Required Inputs
 
 The following input variables are required:
-
-### <a name="input_location"></a> [location](#input\_location)
-
-Description: Azure region where the resource should be deployed.  Changing this forces a new resource to be created.
-
-Type: `string`
 
 ### <a name="input_name"></a> [name](#input\_name)
 
@@ -223,6 +220,14 @@ Type: `string`
 
 Default: `null`
 
+### <a name="input_location"></a> [location](#input\_location)
+
+Description: Azure region where the resource should be deployed.  If null, the location will be inferred from the resource group location.
+
+Type: `string`
+
+Default: `null`
+
 ### <a name="input_lock"></a> [lock](#input\_lock)
 
 Description: The lock level to apply to the databricks workspace. Default is `None`. Possible values are `None`, `CanNotDelete`, and `ReadOnly`.
@@ -259,6 +264,21 @@ Description: Whether customer managed keys for disk encryption will automaticall
 Type: `bool`
 
 Default: `false`
+
+### <a name="input_managed_identities"></a> [managed\_identities](#input\_managed\_identities)
+
+Description: Managed identities to be created for the resource.
+
+Type:
+
+```hcl
+object({
+    system_assigned            = optional(bool, false)
+    user_assigned_resource_ids = optional(set(string), [])
+  })
+```
+
+Default: `{}`
 
 ### <a name="input_managed_resource_group_name"></a> [managed\_resource\_group\_name](#input\_managed\_resource\_group\_name)
 
@@ -469,6 +489,7 @@ Description: The unique identifier of the databricks workspace in Databricks con
 ### <a name="output_databricks_workspace_managed_disk_identity"></a> [databricks\_workspace\_managed\_disk\_identity](#output\_databricks\_workspace\_managed\_disk\_identity)
 
 Description:   A managed\_disk\_identity block as documented below
+
   - `principal_id` - The principal UUID for the internal databricks disks identity needed to provide access to the workspace for enabling Customer Managed Keys.
   - `tenant_id` - The UUID of the tenant where the internal databricks disks identity was created.
   - `type` - The type of the internal databricks disks identity.
@@ -480,6 +501,7 @@ Description: The ID of the Managed Resource Group created by the Databricks Work
 ### <a name="output_databricks_workspace_storage_account_identity"></a> [databricks\_workspace\_storage\_account\_identity](#output\_databricks\_workspace\_storage\_account\_identity)
 
 Description:   A storage\_account\_identity block as documented below
+
   - `principal_id` - The principal UUID for the internal databricks storage account needed to provide access to the workspace for enabling Customer Managed Keys.
   - `tenant_id` - The UUID of the tenant where the internal databricks storage account was created.
   - `type` - The type of the internal databricks storage account.
@@ -491,6 +513,10 @@ Description: The workspace URL which is of the format 'adb-{workspaceId}.{random
 ### <a name="output_private_endpoints"></a> [private\_endpoints](#output\_private\_endpoints)
 
 Description: A map of private endpoints. The map key is the supplied input to var.private\_endpoints. The map value is the entire azurerm\_private\_endpoint resource.
+
+### <a name="output_resource"></a> [resource](#output\_resource)
+
+Description: This is the full output for the resource.
 
 ## Modules
 

@@ -25,7 +25,8 @@ variable "resource_group_name" {
 
 variable "location" {
   type        = string
-  description = "Azure region where the resource should be deployed.  Changing this forces a new resource to be created."
+  description = "Azure region where the resource should be deployed.  If null, the location will be inferred from the resource group location."
+  default     = null
 }
 
 variable "load_balancer_backend_address_pool_id" {
@@ -192,6 +193,7 @@ DESCRIPTION
   }
 }
 
+
 variable "lock" {
   type = object({
     name = optional(string, null)
@@ -276,19 +278,7 @@ A map of diagnostic settings to create on the storage account. The map key is de
 DESCRIPTION
 }
 
-variable "lock" {
-  type = object({
-    name = optional(string, null)
-    kind = optional(string, "None")
-  })
-  description = "The lock level to apply. Default is `None`. Possible values are `None`, `CanNotDelete`, and `ReadOnly`."
-  default     = {}
-  nullable    = false
-  validation {
-    condition     = contains(["CanNotDelete", "ReadOnly", "None"], var.lock.kind)
-    error_message = "The lock level must be one of: 'None', 'CanNotDelete', or 'ReadOnly'."
-  }
-}
+
 
 variable "managed_identities" {
   type = object({

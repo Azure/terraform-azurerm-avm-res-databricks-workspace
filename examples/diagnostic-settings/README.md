@@ -1,7 +1,7 @@
 <!-- BEGIN_TF_DOCS -->
-# Default example
+# Deploy with the diagnostic settings
 
-This deploys the module in its simplest form.
+This deploys the module with diagnostic settings.
 
 ```hcl
 terraform {
@@ -51,13 +51,31 @@ resource "azurerm_resource_group" "this" {
   location = module.regions.regions[random_integer.region_index.result].name
 }
 
+# Create a Log Analytics Workspace for the diagnostic settings
+resource "azurerm_log_analytics_workspace" "this" {
+  name                = module.naming.log_analytics_workspace.name_unique
+  location            = azurerm_resource_group.this.location
+  resource_group_name = azurerm_resource_group.this.name
+  sku                 = "PerGB2018"
+  retention_in_days   = 30
+}
+
 module "databricks" {
   source = "../.."
 
   enable_telemetry    = var.enable_telemetry
   name                = module.naming.databricks_workspace.name_unique
   resource_group_name = azurerm_resource_group.this.name
-  sku                 = "standard"
+
+  sku = "premium"
+
+  # Diagnostic settings are only available for premium workspaces
+  diagnostic_settings = {
+    databricks = {
+      name                  = "diag-${module.naming.databricks_workspace.name_unique}"
+      workspace_resource_id = azurerm_log_analytics_workspace.this.id
+    }
+  }
 }
 ```
 
@@ -84,6 +102,7 @@ The following providers are used by this module:
 
 The following resources are used by this module:
 
+- [azurerm_log_analytics_workspace.this](https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/resources/log_analytics_workspace) (resource)
 - [azurerm_resource_group.this](https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/resources/resource_group) (resource)
 - [random_integer.region_index](https://registry.terraform.io/providers/hashicorp/random/latest/docs/resources/integer) (resource)
 

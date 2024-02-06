@@ -9,15 +9,15 @@ resource "azurerm_databricks_workspace" "this" {
   location            = coalesce(var.location, local.resource_group_location)
   sku                 = var.sku
 
-  load_balancer_backend_address_pool_id               = var.load_balancer_backend_address_pool_id != {} ? var.load_balancer_backend_address_pool_id : null
-  managed_services_cmk_key_vault_key_id               = var.managed_services_cmk_key_vault_key_id != null ? var.managed_services_cmk_key_vault_key_id : null
-  managed_disk_cmk_key_vault_key_id                   = var.managed_disk_cmk_key_vault_key_id != null ? var.managed_disk_cmk_key_vault_key_id : null
+  load_balancer_backend_address_pool_id               = try(var.load_balancer_backend_address_pool_id, null)
+  managed_services_cmk_key_vault_key_id               = try(var.managed_services_cmk_key_vault_key_id, null)
+  managed_disk_cmk_key_vault_key_id                   = try(var.managed_disk_cmk_key_vault_key_id, null)
   managed_disk_cmk_rotation_to_latest_version_enabled = var.managed_disk_cmk_key_vault_key_id != null && var.managed_disk_cmk_rotation_to_latest_version_enabled != null ? var.managed_disk_cmk_rotation_to_latest_version_enabled : null
-  managed_resource_group_name                         = var.managed_resource_group_name != {} ? var.managed_resource_group_name : null
-  customer_managed_key_enabled                        = var.customer_managed_key_enabled != {} ? var.customer_managed_key_enabled : null
-  infrastructure_encryption_enabled                   = var.infrastructure_encryption_enabled != {} ? var.infrastructure_encryption_enabled : null
-  public_network_access_enabled                       = var.public_network_access_enabled != {} ? var.public_network_access_enabled : null
-  network_security_group_rules_required               = var.network_security_group_rules_required != {} ? var.network_security_group_rules_required : null
+  managed_resource_group_name                         = try(var.managed_resource_group_name, null)
+  customer_managed_key_enabled                        = try(var.customer_managed_key_enabled, null)
+  infrastructure_encryption_enabled                   = try(var.infrastructure_encryption_enabled, null)
+  public_network_access_enabled                       = try(var.public_network_access_enabled, null)
+  network_security_group_rules_required               = try(var.network_security_group_rules_required, null)
 
   dynamic "custom_parameters" {
     for_each = var.custom_parameters != {} ? [var.custom_parameters] : []

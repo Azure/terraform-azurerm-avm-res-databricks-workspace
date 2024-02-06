@@ -201,9 +201,9 @@ resource "azurerm_private_dns_zone" "azuredatabricks" {
 module "databricks" {
   source = "../.."
 
-  name                          = module.naming.databricks_workspace.name_unique
-  location                      = azurerm_resource_group.this.location
-  resource_group_name           = azurerm_resource_group.this.name
+  name                = module.naming.databricks_workspace.name_unique
+  resource_group_name = azurerm_resource_group.this.name
+
   sku                           = "premium"
   public_network_access_enabled = true
   custom_parameters = {
@@ -218,6 +218,7 @@ module "databricks" {
   private_endpoints = {
     databricks_ui_api = {
       subresource_name              = "databricks_ui_api"
+      location                      = azurerm_resource_group.this.location
       private_dns_zone_resource_ids = [azurerm_private_dns_zone.azuredatabricks.id]
       subnet_resource_id            = azurerm_subnet.privateendpoint.id
     }

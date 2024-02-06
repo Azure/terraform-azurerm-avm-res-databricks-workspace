@@ -181,9 +181,9 @@ resource "azurerm_role_assignment" "current_user" {
 module "databricks" {
   source = "../.."
 
-  name                                                = module.naming.databricks_workspace.name_unique
-  resource_group_name                                 = azurerm_resource_group.this.name
-  location                                            = azurerm_resource_group.this.location
+  name                = module.naming.databricks_workspace.name_unique
+  resource_group_name = azurerm_resource_group.this.name
+
   sku                                                 = "premium"
   managed_services_cmk_key_vault_key_id               = azurerm_key_vault_key.cmkms.id
   managed_disk_cmk_key_vault_key_id                   = azurerm_key_vault_key.managed_disk_cmk.id

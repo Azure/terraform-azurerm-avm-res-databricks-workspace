@@ -1,3 +1,14 @@
+output "resource" {
+  value       = azurerm_databricks_workspace.this
+  description = "This is the full output for the resource."
+}
+
+output "private_endpoints" {
+  value       = azurerm_private_endpoint.this
+  description = "A map of private endpoints. The map key is the supplied input to var.private_endpoints. The map value is the entire azurerm_private_endpoint resource."
+}
+
+
 output "databricks_id" {
   description = "The ID of the Databricks Workspace in the Azure management plane."
   value       = azurerm_databricks_workspace.this.id
@@ -67,8 +78,4 @@ output "databricks_virtual_network_peering_address_space_prefixes" {
   value       = values(azurerm_databricks_virtual_network_peering.this)[*].address_space_prefixes
 }
 
-output "private_endpoints" {
-  value       = azurerm_private_endpoint.this
-  description = "A map of private endpoints. The map key is the supplied input to var.private_endpoints. The map value is the entire azurerm_private_endpoint resource."
-}
 
