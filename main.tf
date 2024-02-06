@@ -1,7 +1,12 @@
+data "azurerm_resource_group" "parent" {
+  count = var.location == null ? 1 : 0
+  name  = var.resource_group_name
+}
+
 resource "azurerm_databricks_workspace" "this" {
   name                = var.name
   resource_group_name = var.resource_group_name
-  location            = var.location
+  location            = coalesce(var.location, local.resource_group_location)
   sku                 = var.sku
 
   load_balancer_backend_address_pool_id               = var.load_balancer_backend_address_pool_id != {} ? var.load_balancer_backend_address_pool_id : null
