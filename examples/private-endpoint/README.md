@@ -30,6 +30,7 @@ provider "azurerm" {
 }
 
 # We need the tenant id.
+# tflint-ignore: terraform_unused_declarations
 data "azurerm_client_config" "this" {}
 
 # This allows us to randomize the region for the resource group.
