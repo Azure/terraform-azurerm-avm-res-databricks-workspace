@@ -11,6 +11,10 @@ This example shows how to deploy the databricks module with customer managed key
 terraform {
   required_version = ">= 1.0.0"
   required_providers {
+    azuread = {
+      source  = "hashicorp/azuread"
+      version = ">= 2.15.0"
+    }
     azurerm = {
       source  = "hashicorp/azurerm"
       version = ">= 3.7.0, < 4.0.0"
@@ -213,6 +217,8 @@ The following requirements are needed by this module:
 
 - <a name="requirement_terraform"></a> [terraform](#requirement\_terraform) (>= 1.0.0)
 
+- <a name="requirement_azuread"></a> [azuread](#requirement\_azuread) (>= 2.15.0)
+
 - <a name="requirement_azurerm"></a> [azurerm](#requirement\_azurerm) (>= 3.7.0, < 4.0.0)
 
 - <a name="requirement_random"></a> [random](#requirement\_random) (>= 3.5.0, < 4.0.0)
@@ -221,7 +227,7 @@ The following requirements are needed by this module:
 
 The following providers are used by this module:
 
-- <a name="provider_azuread"></a> [azuread](#provider\_azuread)
+- <a name="provider_azuread"></a> [azuread](#provider\_azuread) (>= 2.15.0)
 
 - <a name="provider_azurerm"></a> [azurerm](#provider\_azurerm) (>= 3.7.0, < 4.0.0)
 
