@@ -461,6 +461,10 @@ Default: `{}`
 
 The following outputs are exported:
 
+### <a name="output_databricks_access_connector_ids"></a> [databricks\_access\_connector\_ids](#output\_databricks\_access\_connector\_ids)
+
+Description: The IDs of the Databricks Access Connectors.
+
 ### <a name="output_databricks_id"></a> [databricks\_id](#output\_databricks\_id)
 
 Description: The ID of the Databricks Workspace in the Azure management plane.
