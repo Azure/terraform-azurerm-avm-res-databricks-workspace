@@ -1,6 +1,6 @@
-output "databricks_access_connector_ids" {
-  description = "The IDs of the Databricks Access Connectors."
-  value       = { for key, data in azurerm_databricks_access_connector.this : key => data.id }
+output "databricks_access_connector_principal_ids" {
+  description = "Map of the principal_id's of each Databricks Access Connector."
+  value       = { for key, data in azurerm_databricks_access_connector.this : key => data.identity[0].principal_id }
 }
 
 output "databricks_id" {
