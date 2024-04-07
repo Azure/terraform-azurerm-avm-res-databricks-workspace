@@ -461,9 +461,9 @@ Default: `{}`
 
 The following outputs are exported:
 
-### <a name="output_databricks_access_connector_ids"></a> [databricks\_access\_connector\_ids](#output\_databricks\_access\_connector\_ids)
+### <a name="output_databricks_access_connector_principal_ids"></a> [databricks\_access\_connector\_principal\_ids](#output\_databricks\_access\_connector\_principal\_ids)
 
-Description: The IDs of the Databricks Access Connectors.
+Description: Map of the principal\_id's of each Databricks Access Connector.
 
 ### <a name="output_databricks_id"></a> [databricks\_id](#output\_databricks\_id)
 
