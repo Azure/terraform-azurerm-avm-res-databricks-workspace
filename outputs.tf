@@ -1,3 +1,8 @@
+output "databricks_access_connector_ids" {
+  description = "The IDs of the Databricks Access Connectors."
+  value       = { for key, data in azurerm_databricks_access_connector.this : key => data.id }
+}
+
 output "databricks_id" {
   description = "The ID of the Databricks Workspace in the Azure management plane."
   value       = azurerm_databricks_workspace.this.id
