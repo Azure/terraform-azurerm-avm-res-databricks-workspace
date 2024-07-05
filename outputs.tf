@@ -1,18 +1,3 @@
-output "resource_id" {
-  description = "The ID of the Databricks Workspace in the Azure management plane."
-  value       = azurerm_databricks_workspace.this.id
-}
-
-output "name" {
-  description = "The name of the Databricks Workspace."
-  value       = azurerm_databricks_workspace.this.name
-}
-
-output "system_assigned_mi_principal_id" {
-  description = "The principal ID of the system assigned managed identity."
-  value       = azurerm_databricks_workspace.this.system_assigned_identity[0].principal_id
-}
-
 output "databricks_id" {
   description = "The ID of the Databricks Workspace in the Azure management plane."
   value       = azurerm_databricks_workspace.this.id
@@ -83,6 +68,11 @@ output "databricks_workspace_url" {
   value       = azurerm_databricks_workspace.this.workspace_url
 }
 
+output "name" {
+  description = "The name of the Databricks Workspace."
+  value       = azurerm_databricks_workspace.this.name
+}
+
 output "private_endpoints" {
   description = "A map of private endpoints. The map key is the supplied input to var.private_endpoints. The map value is the entire azurerm_private_endpoint resource."
   value       = azurerm_private_endpoint.this
@@ -91,4 +81,14 @@ output "private_endpoints" {
 output "resource" {
   description = "This is the full output for the resource."
   value       = azurerm_databricks_workspace.this
+}
+
+output "resource_id" {
+  description = "The ID of the Databricks Workspace in the Azure management plane."
+  value       = azurerm_databricks_workspace.this.id
+}
+
+output "system_assigned_mi_principal_id" {
+  description = "The principal ID of the system assigned managed identity."
+  value       = azurerm_databricks_workspace.this.system_assigned_identity[0].principal_id
 }
