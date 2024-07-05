@@ -503,10 +503,6 @@ Description: This is the full output for the resource.
 
 Description: The ID of the Databricks Workspace in the Azure management plane.
 
-### <a name="output_system_assigned_mi_principal_id"></a> [system\_assigned\_mi\_principal\_id](#output\_system\_assigned\_mi\_principal\_id)
-
-Description: The principal ID of the system assigned managed identity.
-
 ## Modules
 
 No modules.
