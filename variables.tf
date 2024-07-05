@@ -1,3 +1,9 @@
+variable "location" {
+  type        = string
+  description = "Azure region where the resource should be deployed."
+  nullable    = false
+}
+
 variable "name" {
   type        = string
   description = "Specifies the name of the Databricks Workspace resource. Changing this forces a new resource to be created."
@@ -195,12 +201,6 @@ variable "load_balancer_backend_address_pool_id" {
   type        = string
   default     = null
   description = "Resource ID of the Outbound Load balancer Backend Address Pool for Secure Cluster Connectivity (No Public IP) workspace. Changing this forces a new resource to be created."
-}
-
-variable "location" {
-  type        = string
-  description = "Azure region where the resource should be deployed."
-  nullable    = false
 }
 
 variable "lock" {
