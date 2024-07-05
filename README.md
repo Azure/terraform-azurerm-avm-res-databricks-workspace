@@ -398,11 +398,11 @@ Default: `{}`
 
 ### <a name="input_tags"></a> [tags](#input\_tags)
 
-Description: The map of tags to be applied to the resource
+Description: (Optional) Tags of the resource.
 
-Type: `map(any)`
+Type: `map(string)`
 
-Default: `{}`
+Default: `null`
 
 ### <a name="input_virtual_network_peering"></a> [virtual\_network\_peering](#input\_virtual\_network\_peering)
 
