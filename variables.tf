@@ -374,12 +374,6 @@ variable "tags" {
   description = "(Optional) Tags of the resource."
 }
 
-variable "tags" {
-  type        = map(any)
-  default     = {}
-  description = "The map of tags to be applied to the resource"
-}
-
 variable "virtual_network_peering" {
   type = map(object({
     name                          = optional(string, null)
