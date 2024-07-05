@@ -1,6 +1,4 @@
 data "azurerm_resource_group" "parent" {
-  count = var.location == null ? 1 : 0
-
   name = var.resource_group_name
 }
 
