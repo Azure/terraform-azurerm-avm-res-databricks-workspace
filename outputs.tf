@@ -1,3 +1,18 @@
+output "resource_id" {
+  description = "The ID of the Databricks Workspace in the Azure management plane."
+  value       = azurerm_databricks_workspace.this.id
+}
+
+output "name" {
+  description = "The name of the Databricks Workspace."
+  value       = azurerm_databricks_workspace.this.name
+}
+
+output "system_assigned_mi_principal_id" {
+  description = "The principal ID of the system assigned managed identity."
+  value       = azurerm_databricks_workspace.this.system_assigned_identity[0].principal_id
+}
+
 output "databricks_id" {
   description = "The ID of the Databricks Workspace in the Azure management plane."
   value       = azurerm_databricks_workspace.this.id
@@ -31,7 +46,7 @@ output "databricks_workspace_id" {
 output "databricks_workspace_managed_disk_identity" {
   description = <<DESCRIPTION
   A managed_disk_identity block as documented below
-  
+
   - `principal_id` - The principal UUID for the internal databricks disks identity needed to provide access to the workspace for enabling Customer Managed Keys.
   - `tenant_id` - The UUID of the tenant where the internal databricks disks identity was created.
   - `type` - The type of the internal databricks disks identity.
@@ -51,7 +66,7 @@ output "databricks_workspace_managed_resource_group_id" {
 output "databricks_workspace_storage_account_identity" {
   description = <<DESCRIPTION
   A storage_account_identity block as documented below
-  
+
   - `principal_id` - The principal UUID for the internal databricks storage account needed to provide access to the workspace for enabling Customer Managed Keys.
   - `tenant_id` - The UUID of the tenant where the internal databricks storage account was created.
   - `type` - The type of the internal databricks storage account.
