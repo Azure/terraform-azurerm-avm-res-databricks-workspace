@@ -87,8 +87,3 @@ output "resource_id" {
   description = "The ID of the Databricks Workspace in the Azure management plane."
   value       = azurerm_databricks_workspace.this.id
 }
-
-output "system_assigned_mi_principal_id" {
-  description = "The principal ID of the system assigned managed identity."
-  value       = azurerm_databricks_workspace.this.system_assigned_identity[0].principal_id
-}
