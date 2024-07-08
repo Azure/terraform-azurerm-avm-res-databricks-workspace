@@ -38,11 +38,12 @@ resource "azurerm_databricks_workspace" "this" {
 }
 
 resource "azurerm_management_lock" "this" {
-  count = var.lock.kind != null ? 1 : 0
+  count = var.lock != null ? 1 : 0
 
   lock_level = var.lock.kind
-  name       = coalesce(var.lock.name, "lock-${var.name}")
-  scope      = azurerm_databricks_workspace.this.id
+  name       = coalesce(var.lock.name, "lock-${var.lock.kind}")
+  scope      = azurerm_MY_RESOURCE.this.id
+  notes      = var.lock.kind == "CanNotDelete" ? "Cannot delete the resource or its child resources." : "Cannot delete or modify the resource or its child resources."
 }
 
 resource "azurerm_role_assignment" "this" {
