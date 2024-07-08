@@ -101,7 +101,6 @@ resource "azurerm_subnet" "privateendpoint" {
   name                                      = "${module.naming.subnet.name_unique}-private-endpoint"
   resource_group_name                       = azurerm_resource_group.this.name
   virtual_network_name                      = azurerm_virtual_network.this.name
-  private_endpoint_network_policies_enabled = false
 }
 
 # A network security group association is required for vnet injection.
@@ -203,7 +202,7 @@ resource "azurerm_private_dns_zone" "azuredatabricks" {
 module "databricks" {
   source = "../.."
 
-  location = module.regions.regions[random_integer.region_index.result].name
+  location            = module.regions.regions[random_integer.region_index.result].name
   name                = module.naming.databricks_workspace.name_unique
   resource_group_name = azurerm_resource_group.this.name
 

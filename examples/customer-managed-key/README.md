@@ -184,6 +184,7 @@ resource "azurerm_role_assignment" "current_user" {
 module "databricks" {
   source = "../.."
 
+  location            = module.regions.regions[random_integer.region_index.result].name
   name                = module.naming.databricks_workspace.name_unique
   resource_group_name = azurerm_resource_group.this.name
 

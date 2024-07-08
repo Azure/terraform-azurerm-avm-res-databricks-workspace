@@ -54,6 +54,7 @@ resource "azurerm_resource_group" "this" {
 module "databricks" {
   source = "../.."
 
+  location            = module.regions.regions[random_integer.region_index.result].name
   enable_telemetry    = var.enable_telemetry
   name                = module.naming.databricks_workspace.name_unique
   resource_group_name = azurerm_resource_group.this.name
