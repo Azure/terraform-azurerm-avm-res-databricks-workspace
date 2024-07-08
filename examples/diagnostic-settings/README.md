@@ -42,7 +42,7 @@ resource "random_integer" "region_index" {
 module "naming" {
   # checkov:skip=CKV_TF_1
   source  = "Azure/naming/azurerm"
-  version = ">= 0.3.0"
+  version = ">= 0.4.1"
 }
 
 # This is required for resource modules
@@ -144,7 +144,7 @@ Version:
 
 Source: Azure/naming/azurerm
 
-Version: >= 0.3.0
+Version: >= 0.4.1
 
 ### <a name="module_regions"></a> [regions](#module\_regions)
 
