@@ -41,7 +41,7 @@ output "databricks_workspace_id" {
 output "databricks_workspace_managed_disk_identity" {
   description = <<DESCRIPTION
   A managed_disk_identity block as documented below
-  
+
   - `principal_id` - The principal UUID for the internal databricks disks identity needed to provide access to the workspace for enabling Customer Managed Keys.
   - `tenant_id` - The UUID of the tenant where the internal databricks disks identity was created.
   - `type` - The type of the internal databricks disks identity.
@@ -61,7 +61,7 @@ output "databricks_workspace_managed_resource_group_id" {
 output "databricks_workspace_storage_account_identity" {
   description = <<DESCRIPTION
   A storage_account_identity block as documented below
-  
+
   - `principal_id` - The principal UUID for the internal databricks storage account needed to provide access to the workspace for enabling Customer Managed Keys.
   - `tenant_id` - The UUID of the tenant where the internal databricks storage account was created.
   - `type` - The type of the internal databricks storage account.
@@ -78,6 +78,11 @@ output "databricks_workspace_url" {
   value       = azurerm_databricks_workspace.this.workspace_url
 }
 
+output "name" {
+  description = "The name of the Databricks Workspace."
+  value       = azurerm_databricks_workspace.this.name
+}
+
 output "private_endpoints" {
   description = "A map of private endpoints. The map key is the supplied input to var.private_endpoints. The map value is the entire azurerm_private_endpoint resource."
   value       = azurerm_private_endpoint.this
@@ -86,4 +91,9 @@ output "private_endpoints" {
 output "resource" {
   description = "This is the full output for the resource."
   value       = azurerm_databricks_workspace.this
+}
+
+output "resource_id" {
+  description = "The ID of the Databricks Workspace in the Azure management plane."
+  value       = azurerm_databricks_workspace.this.id
 }
