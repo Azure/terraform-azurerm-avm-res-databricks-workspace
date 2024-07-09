@@ -1,3 +1,9 @@
+variable "location" {
+  type        = string
+  description = "Azure region where the resource should be deployed."
+  nullable    = false
+}
+
 variable "name" {
   type        = string
   description = "Specifies the name of the Databricks Workspace resource. Changing this forces a new resource to be created."
@@ -16,7 +22,7 @@ variable "resource_group_name" {
 variable "sku" {
   type        = string
   description = <<DESCRIPTION
-  The 'sku' value must be one of 'standard', 'premium', or 'trial'. 
+  The 'sku' value must be one of 'standard', 'premium', or 'trial'.
   NOTE: Downgrading to a trial sku from a standard or premium sku will force a new resource to be created.
   DESCRIPTION
 
@@ -39,7 +45,7 @@ variable "access_connector" {
   }))
   default     = {}
   description = <<DESCRIPTION
- 
+
 Configuration options for the Databricks Access Connector resource. This map includes the following attributes:
 
 - `name` (Required): Specifies the name of the Databricks Access Connector resource. Changing this forces a new resource to be created.
@@ -100,8 +106,8 @@ variable "customer_managed_key_enabled" {
   type        = bool
   default     = false
   description = <<DESCRIPTION
-  Is the workspace enabled for customer managed key encryption? If true this enables the Managed Identity for the managed storage account. 
-  Possible values are true or false. Defaults to false. 
+  Is the workspace enabled for customer managed key encryption? If true this enables the Managed Identity for the managed storage account.
+  Possible values are true or false. Defaults to false.
   This field is only valid if the Databricks Workspace sku is set to premium.
   DESCRIPTION
 
@@ -125,7 +131,7 @@ variable "diagnostic_settings" {
     name                                     = optional(string, null)
     log_categories                           = optional(set(string), [])
     log_groups                               = optional(set(string), ["allLogs"])
-    metric_categories                        = optional(set(string), [])
+    metric_categories                        = optional(set(string), ["AllMetrics"])
     log_analytics_destination_type           = optional(string, "Dedicated")
     workspace_resource_id                    = optional(string, null)
     storage_account_resource_id              = optional(string, null)
@@ -180,8 +186,8 @@ variable "infrastructure_encryption_enabled" {
   default     = false
   description = <<DESCRIPTION
   By default, Azure encrypts storage account data at rest. Infrastructure encryption adds a second layer of encryption to your storage account's data
-  Possible values are true or false. Defaults to false. 
-  This field is only valid if the Databricks Workspace sku is set to premium. 
+  Possible values are true or false. Defaults to false.
+  This field is only valid if the Databricks Workspace sku is set to premium.
   Changing this forces a new resource to be created.
   DESCRIPTION
 
@@ -197,24 +203,22 @@ variable "load_balancer_backend_address_pool_id" {
   description = "Resource ID of the Outbound Load balancer Backend Address Pool for Secure Cluster Connectivity (No Public IP) workspace. Changing this forces a new resource to be created."
 }
 
-variable "location" {
-  type        = string
-  default     = null
-  description = "Azure region where the resource should be deployed.  If null, the location will be inferred from the resource group location."
-}
-
 variable "lock" {
   type = object({
+    kind = string
     name = optional(string, null)
-    kind = optional(string, "None")
   })
-  default     = {}
-  description = "The lock level to apply to the databricks workspace. Default is `None`. Possible values are `None`, `CanNotDelete`, and `ReadOnly`."
-  nullable    = false
+  default     = null
+  description = <<DESCRIPTION
+  Controls the Resource Lock configuration for this resource. The following properties can be specified:
+
+  - `kind` - (Required) The type of lock. Possible values are `\"CanNotDelete\"` and `\"ReadOnly\"`.
+  - `name` - (Optional) The name of the lock. If not specified, a name will be generated based on the `kind` value. Changing this forces the creation of a new resource.
+  DESCRIPTION
 
   validation {
-    condition     = contains(["CanNotDelete", "ReadOnly", "None"], var.lock.kind)
-    error_message = "The lock level must be one of: 'None', 'CanNotDelete', or 'ReadOnly'."
+    condition     = var.lock != null ? contains(["CanNotDelete", "ReadOnly"], var.lock.kind) : true
+    error_message = "Lock kind must be either `\"CanNotDelete\"` or `\"ReadOnly\"`."
   }
 }
 
@@ -238,22 +242,13 @@ variable "managed_disk_cmk_rotation_to_latest_version_enabled" {
   description = "Whether customer managed keys for disk encryption will automatically be rotated to the latest version. Optional."
 }
 
-variable "managed_identities" {
-  type = object({
-    system_assigned            = optional(bool, false)
-    user_assigned_resource_ids = optional(set(string), [])
-  })
-  default     = {}
-  description = "Managed identities to be created for the resource."
-}
-
 variable "managed_resource_group_name" {
   type        = string
   default     = null
   description = <<DESCRIPTION
-  The name of the resource group where Azure should place the managed Databricks resources. 
+  The name of the resource group where Azure should place the managed Databricks resources.
   Changing this forces a new resource to be created.
-  
+
   NOTE: Make sure that this field is unique if you have multiple Databrick Workspaces deployed in your subscription and choose to not have the managed_resource_group_name auto generated by the Azure Resource Provider. Having multiple Databrick Workspaces deployed in the same subscription with the same manage_resource_group_name may result in some resources that cannot be deleted.
   DESCRIPTION
 }
@@ -282,16 +277,15 @@ variable "network_security_group_rules_required" {
   type        = string
   default     = null
   description = <<DESCRIPTION
-  Does the data plane (clusters) to control plane communication happen over private link endpoint only or publicly? 
-  Possible values AllRules, NoAzureDatabricksRules or NoAzureServiceRules. 
+  Does the data plane (clusters) to control plane communication happen over private link endpoint only or publicly?
+  Possible values AllRules, NoAzureDatabricksRules or NoAzureServiceRules.
   Required when public_network_access_enabled is set to false.
   DESCRIPTION
 }
 
 variable "private_endpoints" {
   type = map(object({
-    name             = optional(string, null)
-    subresource_name = string
+    name = optional(string, null)
     role_assignments = optional(map(object({
       role_definition_id_or_name             = string
       principal_id                           = string
@@ -300,13 +294,15 @@ variable "private_endpoints" {
       condition                              = optional(string, null)
       condition_version                      = optional(string, null)
       delegated_managed_identity_resource_id = optional(string, null)
+      principal_type                         = optional(string, null)
     })), {})
     lock = optional(object({
+      kind = string
       name = optional(string, null)
-      kind = optional(string, "None")
-    }), {})
-    tags                                    = optional(map(any), null)
+    }), null)
+    tags                                    = optional(map(string), null)
     subnet_resource_id                      = string
+    subresource_name                        = string # NOTE: `subresource_name` can be excluded if the resource does not support multiple sub resource types (e.g. storage account supports blob, queue, etc)
     private_dns_zone_group_name             = optional(string, "default")
     private_dns_zone_resource_ids           = optional(set(string), [])
     application_security_group_associations = optional(map(string), {})
@@ -317,39 +313,47 @@ variable "private_endpoints" {
     ip_configurations = optional(map(object({
       name               = string
       private_ip_address = string
-      subresource_name   = optional(string)
-      member_name        = optional(string)
-
     })), {})
   }))
   default     = {}
   description = <<DESCRIPTION
-A map of private endpoints to create on the Databrick workspace. The map key is deliberately arbitrary to avoid issues where map keys maybe unknown at plan time.
+  A map of private endpoints to create on the Key Vault. The map key is deliberately arbitrary to avoid issues where map keys maybe unknown at plan time.
 
-- `name` - (Optional) The name of the private endpoint. One will be generated if not set.
-- `subresource_name` - The subresource name for the private endpoint. Must be one of "databricks_ui_api" or "browser_authentication".
-- `role_assignments` - (Optional) A map of role assignments to create on the private endpoint. The map key is deliberately arbitrary to avoid issues where map keys maybe unknown at plan time. See `var.role_assignments` for more information.
-- `lock` - (Optional) The lock level to apply to the private endpoint. Default is `None`. Possible values are `None`, `CanNotDelete`, and `ReadOnly`.
-- `tags` - (Optional) A mapping of tags to assign to the private endpoint.
-- `subnet_resource_id` - The resource ID of the subnet to deploy the private endpoint in.
-- `private_dns_zone_group_name` - (Optional) The name of the private DNS zone group. One will be generated if not set.
-- `private_dns_zone_resource_ids` - (Optional) A set of resource IDs of private DNS zones to associate with the private endpoint. If not set, no zone groups will be created and the private endpoint will not be associated with any private DNS zones. DNS records must be managed external to this module.
-- `application_security_group_resource_ids` - (Optional) A map of resource IDs of application security groups to associate with the private endpoint. The map key is deliberately arbitrary to avoid issues where map keys maybe unknown at plan time.
-- `private_service_connection_name` - (Optional) The name of the private service connection. One will be generated if not set.
-- `network_interface_name` - (Optional) The name of the network interface. One will be generated if not set.
-- `location` - (Optional) The Azure location where the resources will be deployed. Defaults to the location of the resource group.
-- `resource_group_name` - (Optional) The resource group where the resources will be deployed. Defaults to the resource group of the databricks instance.
-- `ip_configurations` - (Optional) A map of IP configurations to create on the private endpoint. If not specified the platform will create one. The map key is deliberately arbitrary to avoid issues where map keys maybe unknown at plan time.
-  - `name` - The name of the IP configuration.
-  - `private_ip_address` - The private IP address of the IP configuration.
-DESCRIPTION
+  - `name` - (Optional) The name of the private endpoint. One will be generated if not set.
+  - `role_assignments` - (Optional) A map of role assignments to create on the private endpoint. The map key is deliberately arbitrary to avoid issues where map keys maybe unknown at plan time. See `var.role_assignments` for more information.
+    - `role_definition_id_or_name` - The ID or name of the role definition to assign to the principal.
+    - `principal_id` - The ID of the principal to assign the role to.
+    - `description` - (Optional) The description of the role assignment.
+    - `skip_service_principal_aad_check` - (Optional) If set to true, skips the Azure Active Directory check for the service principal in the tenant. Defaults to false.
+    - `condition` - (Optional) The condition which will be used to scope the role assignment.
+    - `condition_version` - (Optional) The version of the condition syntax. Leave as `null` if you are not using a condition, if you are then valid values are '2.0'.
+    - `delegated_managed_identity_resource_id` - (Optional) The delegated Azure Resource Id which contains a Managed Identity. Changing this forces a new resource to be created. This field is only used in cross-tenant scenario.
+    - `principal_type` - (Optional) The type of the `principal_id`. Possible values are `User`, `Group` and `ServicePrincipal`. It is necessary to explicitly set this attribute when creating role assignments if the principal creating the assignment is constrained by ABAC rules that filters on the PrincipalType attribute.
+  - `lock` - (Optional) The lock level to apply to the private endpoint. Default is `None`. Possible values are `None`, `CanNotDelete`, and `ReadOnly`.
+    - `kind` - (Required) The type of lock. Possible values are `\"CanNotDelete\"` and `\"ReadOnly\"`.
+    - `name` - (Optional) The name of the lock. If not specified, a name will be generated based on the `kind` value. Changing this forces the creation of a new resource.
+  - `tags` - (Optional) A mapping of tags to assign to the private endpoint.
+  - `subnet_resource_id` - The resource ID of the subnet to deploy the private endpoint in.
+  - `subresource_name` - The name of the sub resource for the private endpoint.
+  - `private_dns_zone_group_name` - (Optional) The name of the private DNS zone group. One will be generated if not set.
+  - `private_dns_zone_resource_ids` - (Optional) A set of resource IDs of private DNS zones to associate with the private endpoint. If not set, no zone groups will be created and the private endpoint will not be associated with any private DNS zones. DNS records must be managed external to this module.
+  - `application_security_group_resource_ids` - (Optional) A map of resource IDs of application security groups to associate with the private endpoint. The map key is deliberately arbitrary to avoid issues where map keys maybe unknown at plan time.
+  - `private_service_connection_name` - (Optional) The name of the private service connection. One will be generated if not set.
+  - `network_interface_name` - (Optional) The name of the network interface. One will be generated if not set.
+  - `location` - (Optional) The Azure location where the resources will be deployed. Defaults to the location of the resource group.
+  - `resource_group_name` - (Optional) The resource group where the resources will be deployed. Defaults to the resource group of the Key Vault.
+  - `ip_configurations` - (Optional) A map of IP configurations to create on the private endpoint. If not specified the platform will create one. The map key is deliberately arbitrary to avoid issues where map keys maybe unknown at plan time.
+    - `name` - The name of the IP configuration.
+    - `private_ip_address` - The private IP address of the IP configuration.
+  DESCRIPTION
+  nullable    = false
 }
 
 variable "public_network_access_enabled" {
   type        = bool
   default     = true
   description = <<DESCRIPTION
-  Allow public access for accessing workspace. Set value to false to access workspace only via private link endpoint. 
+  Allow public access for accessing workspace. Set value to false to access workspace only via private link endpoint.
   Possible values include true or false. Defaults to true.
   Creation of workspace with PublicNetworkAccess property set to false is only supported for VNet Injected workspace.
   DESCRIPTION
@@ -364,26 +368,31 @@ variable "role_assignments" {
     condition                              = optional(string, null)
     condition_version                      = optional(string, null)
     delegated_managed_identity_resource_id = optional(string, null)
+    principal_type                         = optional(string, null)
   }))
   default     = {}
   description = <<DESCRIPTION
-A map of role assignments to create on the databricks workspace . The map key is deliberately arbitrary to avoid issues where map keys maybe unknown at plan time.
+  A map of role assignments to create on the <RESOURCE>. The map key is deliberately arbitrary to avoid issues where map keys maybe unknown at plan time.
 
-- `role_definition_id_or_name` - The ID or name of the role definition to assign to the principal.
-- `principal_id` - The ID of the principal to assign the role to.
-- `description` - The description of the role assignment.
-- `skip_service_principal_aad_check` - If set to true, skips the Azure Active Directory check for the service principal in the tenant. Defaults to false.
-- `condition` - The condition which will be used to scope the role assignment.
-- `condition_version` - The version of the condition syntax. If you are using a condition, valid values are '2.0'.
+  - `role_definition_id_or_name` - The ID or name of the role definition to assign to the principal.
+  - `principal_id` - The ID of the principal to assign the role to.
+  - `description` - (Optional) The description of the role assignment.
+  - `skip_service_principal_aad_check` - (Optional) If set to true, skips the Azure Active Directory check for the service principal in the tenant. Defaults to false.
+  - `condition` - (Optional) The condition which will be used to scope the role assignment.
+  - `condition_version` - (Optional) The version of the condition syntax. Leave as `null` if you are not using a condition, if you are then valid values are '2.0'.
+  - `delegated_managed_identity_resource_id` - (Optional) The delegated Azure Resource Id which contains a Managed Identity. Changing this forces a new resource to be created. This field is only used in cross-tenant scenario.
+  - `principal_type` - (Optional) The type of the `principal_id`. Possible values are `User`, `Group` and `ServicePrincipal`. It is necessary to explicitly set this attribute when creating role assignments if the principal creating the assignment is constrained by ABAC rules that filters on the PrincipalType attribute.
 
-> Note: only set `skip_service_principal_aad_check` to true if you are assigning a role to a service principal.
-DESCRIPTION
+  > Note: only set `skip_service_principal_aad_check` to true if you are assigning a role to a service principal.
+  DESCRIPTION
+  nullable    = false
 }
 
+# tflint-ignore: terraform_unused_declarations
 variable "tags" {
-  type        = map(any)
-  default     = {}
-  description = "The map of tags to be applied to the resource"
+  type        = map(string)
+  default     = null
+  description = "(Optional) Tags of the resource."
 }
 
 variable "virtual_network_peering" {
@@ -408,7 +417,7 @@ A map of virtual network peering configurations. The map key is deliberately arb
 - `allow_virtual_network_access` - (Optional) Can the VMs in the local virtual network space access the VMs in the remote virtual network space? Defaults to true.
 - `allow_forwarded_traffic` - (Optional) Can the forwarded traffic from the VMs in the local virtual network be forwarded to the remote virtual network? Defaults to false.
 - `allow_gateway_transit` - (Optional) Can the gateway links be used in the remote virtual network to link to the Databricks virtual network? Defaults to false.
-- `use_remote_gateways` - (Optional) Can remote gateways be used on the Databricks virtual network? Defaults to false. 
+- `use_remote_gateways` - (Optional) Can remote gateways be used on the Databricks virtual network? Defaults to false.
                           If the use_remote_gateways is set to true, and allow_gateway_transit on the remote peering is also true, the virtual network will use the gateways of the remote virtual network for transit. Only one peering can have this flag set to true. use_remote_gateways cannot be set if the virtual network already has a gateway.
 DESCRIPTION
 }
