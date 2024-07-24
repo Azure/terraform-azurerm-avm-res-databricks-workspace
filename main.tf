@@ -82,12 +82,13 @@ resource "azurerm_monitor_diagnostic_setting" "this" {
       category_group = enabled_log.value
     }
   }
-  dynamic "metric" {
+  # remove the below block since databricks is not using metric categories
+  /*   dynamic "metric" {
     for_each = each.value.metric_categories
     content {
       category = metric.value
     }
-  }
+  } */
 }
 
 resource "azurerm_databricks_workspace_root_dbfs_customer_managed_key" "this" {
