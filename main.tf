@@ -20,6 +20,7 @@ resource "azurerm_databricks_workspace" "this" {
 
   dynamic "custom_parameters" {
     for_each = var.custom_parameters != {} ? [var.custom_parameters] : []
+
     content {
       machine_learning_workspace_id                        = lookup(custom_parameters.value, "machine_learning_workspace_id", null)
       nat_gateway_name                                     = lookup(custom_parameters.value, "nat_gateway_name", "nat-gateway")
@@ -72,12 +73,14 @@ resource "azurerm_monitor_diagnostic_setting" "this" {
 
   dynamic "enabled_log" {
     for_each = each.value.log_categories
+
     content {
       category = enabled_log.value
     }
   }
   dynamic "enabled_log" {
     for_each = each.value.log_groups
+
     content {
       category_group = enabled_log.value
     }
