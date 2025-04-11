@@ -16,7 +16,7 @@ terraform {
   required_providers {
     azurerm = {
       source  = "hashicorp/azurerm"
-      version = ">= 3.7.0, < 4.0.0"
+      version = "~> 4.0"
     }
     random = {
       source  = "hashicorp/random"
@@ -236,6 +236,12 @@ module "databricks" {
       location                      = azurerm_resource_group.this.location
       private_dns_zone_resource_ids = [azurerm_private_dns_zone.azuredatabricks.id]
       subnet_resource_id            = azurerm_subnet.privateendpoint.id
+    },
+    browser_authentication = {
+      subresource_name              = "browser_authentication "
+      location                      = azurerm_resource_group.this.location
+      private_dns_zone_resource_ids = [azurerm_private_dns_zone.azuredatabricks.id]
+      subnet_resource_id            = azurerm_subnet.privateendpoint.id
     }
   }
 }
@@ -251,7 +257,7 @@ The following requirements are needed by this module:
 
 - <a name="requirement_terraform"></a> [terraform](#requirement\_terraform) (>= 1.0.0)
 
-- <a name="requirement_azurerm"></a> [azurerm](#requirement\_azurerm) (>= 3.7.0, < 4.0.0)
+- <a name="requirement_azurerm"></a> [azurerm](#requirement\_azurerm) (~> 4.0)
 
 - <a name="requirement_random"></a> [random](#requirement\_random) (>= 3.5.0, < 4.0.0)
 
@@ -259,7 +265,7 @@ The following requirements are needed by this module:
 
 The following providers are used by this module:
 
-- <a name="provider_azurerm"></a> [azurerm](#provider\_azurerm) (>= 3.7.0, < 4.0.0)
+- <a name="provider_azurerm"></a> [azurerm](#provider\_azurerm) (~> 4.0)
 
 - <a name="provider_random"></a> [random](#provider\_random) (>= 3.5.0, < 4.0.0)
 

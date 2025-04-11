@@ -7,7 +7,9 @@ resource "azurerm_databricks_workspace" "this" {
   name                                                = var.name
   resource_group_name                                 = var.resource_group_name
   sku                                                 = var.sku
+  access_connector_id                                 = try(var.access_connector_id, null)
   customer_managed_key_enabled                        = try(var.customer_managed_key_enabled, null)
+  default_storage_firewall_enabled                    = try(var.default_storage_firewall_enabled, false)
   infrastructure_encryption_enabled                   = try(var.infrastructure_encryption_enabled, null)
   load_balancer_backend_address_pool_id               = try(var.load_balancer_backend_address_pool_id, null)
   managed_disk_cmk_key_vault_key_id                   = try(var.managed_disk_cmk_key_vault_key_id, null)
@@ -20,6 +22,7 @@ resource "azurerm_databricks_workspace" "this" {
 
   dynamic "custom_parameters" {
     for_each = var.custom_parameters != {} ? [var.custom_parameters] : []
+
     content {
       machine_learning_workspace_id                        = lookup(custom_parameters.value, "machine_learning_workspace_id", null)
       nat_gateway_name                                     = lookup(custom_parameters.value, "nat_gateway_name", "nat-gateway")
@@ -72,12 +75,14 @@ resource "azurerm_monitor_diagnostic_setting" "this" {
 
   dynamic "enabled_log" {
     for_each = each.value.log_categories
+
     content {
       category = enabled_log.value
     }
   }
   dynamic "enabled_log" {
     for_each = each.value.log_groups
+
     content {
       category_group = enabled_log.value
     }

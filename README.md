@@ -109,6 +109,15 @@ map(object({
 
 Default: `{}`
 
+### <a name="input_access_connector_id"></a> [access\_connector\_id](#input\_access\_connector\_id)
+
+Description:   The ID of the Databricks Access Connector to provide access to the workspace.   
+  The access\_connector\_id field is required when default\_storage\_firewall\_enabled is set to true.
+
+Type: `string`
+
+Default: `null`
+
 ### <a name="input_custom_parameters"></a> [custom\_parameters](#input\_custom\_parameters)
 
 Description: A map of custom parameters for configuring the Databricks Workspace. This object allows for detailed configuration, with each attribute representing a specific setting:
@@ -167,6 +176,14 @@ Description:     The ID of the customer-managed key for DBFS root.
 Type: `string`
 
 Default: `null`
+
+### <a name="input_default_storage_firewall_enabled"></a> [default\_storage\_firewall\_enabled](#input\_default\_storage\_firewall\_enabled)
+
+Description:   Disallow public access to default storage account. Defaults to false.
+
+Type: `bool`
+
+Default: `false`
 
 ### <a name="input_diagnostic_settings"></a> [diagnostic\_settings](#input\_diagnostic\_settings)
 

@@ -58,6 +58,20 @@ Configuration options for the Databricks Access Connector resource. This map inc
   DESCRIPTION
 }
 
+variable "access_connector_id" {
+  type        = string
+  default     = null
+  description = <<DESCRIPTION
+  The ID of the Databricks Access Connector to provide access to the workspace. 
+  The access_connector_id field is required when default_storage_firewall_enabled is set to true.
+  DESCRIPTION
+
+  validation {
+    condition     = var.default_storage_firewall_enabled == false || var.access_connector_id != null
+    error_message = "The access_connector_id is required when default_storage_firewall_enabled is set to true."
+  }
+}
+
 variable "custom_parameters" {
   type = object({
     machine_learning_workspace_id                        = optional(string, null)
@@ -123,6 +137,14 @@ variable "dbfs_root_cmk_key_vault_key_id" {
   description = <<DESCRIPTION
     The ID of the customer-managed key for DBFS root.
     This is required when customer_managed_key_enabled is set to true.
+  DESCRIPTION
+}
+
+variable "default_storage_firewall_enabled" {
+  type        = bool
+  default     = false
+  description = <<DESCRIPTION
+  Disallow public access to default storage account. Defaults to false.
   DESCRIPTION
 }
 
