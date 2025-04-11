@@ -225,7 +225,7 @@ module "databricks" {
       subnet_resource_id            = azurerm_subnet.privateendpoint.id
     },
     browser_authentication = {
-      subresource_name              = "browser_authentication "
+      subresource_name              = "browser_authentication"
       location                      = azurerm_resource_group.this.location
       private_dns_zone_resource_ids = [azurerm_private_dns_zone.azuredatabricks.id]
       subnet_resource_id            = azurerm_subnet.privateendpoint.id
