@@ -4,7 +4,7 @@ usage () {
   echo "Usage: avm <make target>"
 }
 
-CONTAINER_RUNTIME=${CONTAINER_RUNTIME:-docker}
+CONTAINER_RUNTIME=${CONTAINER_RUNTIME:-podman}
 
 if [ ! "$(command -v "$CONTAINER_RUNTIME")" ]; then
     echo "Error: $CONTAINER_RUNTIME is not installed. Please install $CONTAINER_RUNTIME first."
