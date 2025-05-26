@@ -205,9 +205,7 @@ module "databricks" {
   location            = "uk south"
   name                = module.naming.databricks_workspace.name_unique
   resource_group_name = azurerm_resource_group.this.name
-
-  sku                           = "premium"
-  public_network_access_enabled = true
+  sku                 = "premium"
   custom_parameters = {
     no_public_ip                                         = true
     public_subnet_name                                   = azurerm_subnet.public.name
@@ -216,7 +214,6 @@ module "databricks" {
     private_subnet_network_security_group_association_id = azurerm_subnet_network_security_group_association.private.id
     virtual_network_id                                   = azurerm_virtual_network.this.id
   }
-
   private_endpoints = {
     databricks_ui_api = {
       subresource_name              = "databricks_ui_api"
@@ -225,6 +222,7 @@ module "databricks" {
       subnet_resource_id            = azurerm_subnet.privateendpoint.id
     }
   }
+  public_network_access_enabled = true
 }
 
 

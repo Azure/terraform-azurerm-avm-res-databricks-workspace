@@ -184,16 +184,15 @@ resource "azurerm_role_assignment" "current_user" {
 module "databricks" {
   source = "../.."
 
-  location            = "uk south"
-  name                = module.naming.databricks_workspace.name_unique
-  resource_group_name = azurerm_resource_group.this.name
-
+  location                                            = "uk south"
+  name                                                = module.naming.databricks_workspace.name_unique
+  resource_group_name                                 = azurerm_resource_group.this.name
   sku                                                 = "premium"
-  managed_services_cmk_key_vault_key_id               = azurerm_key_vault_key.cmkms.id
-  managed_disk_cmk_key_vault_key_id                   = azurerm_key_vault_key.managed_disk_cmk.id
-  managed_disk_cmk_rotation_to_latest_version_enabled = true
   customer_managed_key_enabled                        = true
   dbfs_root_cmk_key_vault_key_id                      = azurerm_key_vault_key.dbfs_root.id
+  managed_disk_cmk_key_vault_key_id                   = azurerm_key_vault_key.managed_disk_cmk.id
+  managed_disk_cmk_rotation_to_latest_version_enabled = true
+  managed_services_cmk_key_vault_key_id               = azurerm_key_vault_key.cmkms.id
 }
 
 # add the disk encryption key to the key vault access policy
