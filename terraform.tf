@@ -1,5 +1,6 @@
 terraform {
   required_version = ">= 1.6.0"
+
   required_providers {
     # TODO: Ensure all required providers are listed here.
     azurerm = {
