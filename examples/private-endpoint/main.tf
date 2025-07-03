@@ -139,16 +139,16 @@ resource "azurerm_network_security_group" "this" {
     source_port_range          = "*"
   }
   security_rule {
-    access                      = "Allow"
-    description                 = "Required for workers communication with Databricks Webapp."
-    destination_address_prefix  = "AzureDatabricks"
-    destination_port_ranges     = ["443", "3306", "8443-8451"]
-    direction                   = "Outbound"
-    name                        = "Microsoft.Databricks-workspaces_UseOnly_databricks-worker-to-databricks-webapp"
-    priority                    = 100
-    protocol                    = "Tcp"
-    source_address_prefix       = "VirtualNetwork"
-    source_port_range           = "*"
+    access                     = "Allow"
+    description                = "Required for workers communication with Databricks Webapp."
+    destination_address_prefix = "AzureDatabricks"
+    destination_port_ranges    = ["443", "3306", "8443-8451"]
+    direction                  = "Outbound"
+    name                       = "Microsoft.Databricks-workspaces_UseOnly_databricks-worker-to-databricks-webapp"
+    priority                   = 100
+    protocol                   = "Tcp"
+    source_address_prefix      = "VirtualNetwork"
+    source_port_range          = "*"
   }
   security_rule {
     access                     = "Allow"
@@ -212,7 +212,7 @@ resource "azurerm_databricks_access_connector" "this" {
   name                = "${module.naming.databricks_workspace.name_unique}-access-connector"
   resource_group_name = azurerm_resource_group.this.name
   identity {
-    type         = "SystemAssigned"
+    type = "SystemAssigned"
   }
 }
 
@@ -220,13 +220,13 @@ resource "azurerm_databricks_access_connector" "this" {
 module "databricks" {
   source = "../.."
 
-  location                         = "uk south"
-  name                             = module.naming.databricks_workspace.name_unique
-  resource_group_name              = azurerm_resource_group.this.name
-  sku                              = "premium"
-  default_storage_firewall_enabled = true
+  location                              = "uk south"
+  name                                  = module.naming.databricks_workspace.name_unique
+  resource_group_name                   = azurerm_resource_group.this.name
+  sku                                   = "premium"
+  default_storage_firewall_enabled      = true
   network_security_group_rules_required = "NoAzureDatabricksRules" # "AllRules", Required when public_network_access_enabled is set to false.
-  access_connector_id              = azurerm_databricks_access_connector.this.id
+  access_connector_id                   = azurerm_databricks_access_connector.this.id
   custom_parameters = {
     no_public_ip                                         = true
     public_subnet_name                                   = azurerm_subnet.public.name
@@ -235,23 +235,23 @@ module "databricks" {
     private_subnet_network_security_group_association_id = azurerm_subnet_network_security_group_association.private.id
     virtual_network_id                                   = azurerm_virtual_network.this.id
   }
-  # private_endpoints = {
-  #   databricks_ui_api = {
-  #     name                            = "${module.naming.private_endpoint.name_unique}-databricks-ui-api"
-  #     private_service_connection_name = "${module.naming.private_endpoint.name_unique}-pse-databricks-ui-api"
-  #     subresource_name                = "databricks_ui_api"
-  #     location                        = azurerm_resource_group.this.location
-  #     private_dns_zone_resource_ids   = [azurerm_private_dns_zone.azuredatabricks.id]
-  #     subnet_resource_id              = azurerm_subnet.privateendpoint.id
-  #   },
-  #   browser_authentication = {
-  #     name                            = "${module.naming.private_endpoint.name_unique}-browser-authentication"
-  #     private_service_connection_name = "${module.naming.private_endpoint.name_unique}-pse-browser-authentication"
-  #     subresource_name                = "browser_authentication"
-  #     location                        = azurerm_resource_group.this.location
-  #     private_dns_zone_resource_ids   = [azurerm_private_dns_zone.azuredatabricks.id]
-  #     subnet_resource_id              = azurerm_subnet.privateendpoint.id
-  #   }
-  # }
+  private_endpoints = {
+    databricks_ui_api = {
+      name                            = "${module.naming.private_endpoint.name_unique}-databricks-ui-api"
+      private_service_connection_name = "${module.naming.private_endpoint.name_unique}-pse-databricks-ui-api"
+      subresource_name                = "databricks_ui_api"
+      location                        = azurerm_resource_group.this.location
+      private_dns_zone_resource_ids   = [azurerm_private_dns_zone.azuredatabricks.id]
+      subnet_resource_id              = azurerm_subnet.privateendpoint.id
+    },
+    browser_authentication = {
+      name                            = "${module.naming.private_endpoint.name_unique}-browser-authentication"
+      private_service_connection_name = "${module.naming.private_endpoint.name_unique}-pse-browser-authentication"
+      subresource_name                = "browser_authentication"
+      location                        = azurerm_resource_group.this.location
+      private_dns_zone_resource_ids   = [azurerm_private_dns_zone.azuredatabricks.id]
+      subnet_resource_id              = azurerm_subnet.privateendpoint.id
+    }
+  }
   public_network_access_enabled = true
 }
