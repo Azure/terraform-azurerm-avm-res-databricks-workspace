@@ -122,10 +122,12 @@ resource "azurerm_subnet_network_security_group_association" "private" {
   network_security_group_id = azurerm_network_security_group.this.id
   subnet_id                 = azurerm_subnet.private.id
 }
+
 resource "azurerm_subnet_network_security_group_association" "public" {
   network_security_group_id = azurerm_network_security_group.this.id
   subnet_id                 = azurerm_subnet.public.id
 }
+
 # A network security group is required for vnet injection.
 resource "azurerm_network_security_group" "this" {
   location            = azurerm_resource_group.this.location
@@ -230,16 +232,20 @@ module "databricks" {
   }
   private_endpoints = {
     databricks_ui_api = {
-      subresource_name              = "databricks_ui_api"
-      location                      = azurerm_resource_group.this.location
-      private_dns_zone_resource_ids = [azurerm_private_dns_zone.azuredatabricks.id]
-      subnet_resource_id            = azurerm_subnet.privateendpoint.id
+      name                            = "${module.naming.private_endpoint.name_unique}-databricks-ui-api"
+      private_service_connection_name = "${module.naming.private_endpoint.name_unique}-pse-databricks-ui-api"
+      subresource_name                = "databricks_ui_api"
+      location                        = azurerm_resource_group.this.location
+      private_dns_zone_resource_ids   = [azurerm_private_dns_zone.azuredatabricks.id]
+      subnet_resource_id              = azurerm_subnet.privateendpoint.id
     },
     browser_authentication = {
-      subresource_name              = "browser_authentication"
-      location                      = azurerm_resource_group.this.location
-      private_dns_zone_resource_ids = [azurerm_private_dns_zone.azuredatabricks.id]
-      subnet_resource_id            = azurerm_subnet.privateendpoint.id
+      name                            = "${module.naming.private_endpoint.name_unique}-browser-authentication"
+      private_service_connection_name = "${module.naming.private_endpoint.name_unique}-pse-browser-authentication"
+      subresource_name                = "browser_authentication"
+      location                        = azurerm_resource_group.this.location
+      private_dns_zone_resource_ids   = [azurerm_private_dns_zone.azuredatabricks.id]
+      subnet_resource_id              = azurerm_subnet.privateendpoint.id
     }
   }
   public_network_access_enabled = true
