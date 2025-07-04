@@ -13,9 +13,11 @@ resource "azurerm_databricks_workspace" "this" {
   infrastructure_encryption_enabled                   = try(var.infrastructure_encryption_enabled, null)
   load_balancer_backend_address_pool_id               = try(var.load_balancer_backend_address_pool_id, null)
   managed_disk_cmk_key_vault_key_id                   = try(var.managed_disk_cmk_key_vault_key_id, null)
+  managed_disk_cmk_key_vault_id                       = try(var.managed_disk_cmk_key_vault_id, null)
   managed_disk_cmk_rotation_to_latest_version_enabled = var.managed_disk_cmk_key_vault_key_id != null && var.managed_disk_cmk_rotation_to_latest_version_enabled != null ? var.managed_disk_cmk_rotation_to_latest_version_enabled : null
   managed_resource_group_name                         = try(var.managed_resource_group_name, null)
   managed_services_cmk_key_vault_key_id               = try(var.managed_services_cmk_key_vault_key_id, null)
+  managed_services_cmk_key_vault_id                   = try(var.managed_services_cmk_key_vault_id, null)
   network_security_group_rules_required               = try(var.network_security_group_rules_required, null)
   public_network_access_enabled                       = try(var.public_network_access_enabled, null)
   tags                                                = var.tags
@@ -36,6 +38,17 @@ resource "azurerm_databricks_workspace" "this" {
       storage_account_sku_name                             = lookup(custom_parameters.value, "storage_account_sku_name", "Standard_GRS")
       virtual_network_id                                   = lookup(custom_parameters.value, "virtual_network_id", null)
       vnet_address_prefix                                  = lookup(custom_parameters.value, "vnet_address_prefix", "10.139")
+    }
+  }
+
+  dynamic "enhanced_security_compliance" {
+    for_each = var.enhanced_security_compliance != null ? [var.enhanced_security_compliance] : []
+
+    content {
+      automatic_cluster_update_enabled      = enhanced_security_compliance.value.automatic_cluster_update_enabled
+      compliance_security_profile_enabled   = enhanced_security_compliance.value.compliance_security_profile_enabled
+      compliance_security_profile_standards = enhanced_security_compliance.value.compliance_security_profile_standards
+      enhanced_security_monitoring_enabled  = enhanced_security_compliance.value.enhanced_security_monitoring_enabled
     }
   }
 }
