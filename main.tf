@@ -12,12 +12,12 @@ resource "azurerm_databricks_workspace" "this" {
   default_storage_firewall_enabled                    = var.default_storage_firewall_enabled == true ? true : null
   infrastructure_encryption_enabled                   = try(var.infrastructure_encryption_enabled, null)
   load_balancer_backend_address_pool_id               = try(var.load_balancer_backend_address_pool_id, null)
-  managed_disk_cmk_key_vault_key_id                   = try(var.managed_disk_cmk_key_vault_key_id, null)
   managed_disk_cmk_key_vault_id                       = try(var.managed_disk_cmk_key_vault_id, null)
+  managed_disk_cmk_key_vault_key_id                   = try(var.managed_disk_cmk_key_vault_key_id, null)
   managed_disk_cmk_rotation_to_latest_version_enabled = var.managed_disk_cmk_key_vault_key_id != null && var.managed_disk_cmk_rotation_to_latest_version_enabled != null ? var.managed_disk_cmk_rotation_to_latest_version_enabled : null
   managed_resource_group_name                         = try(var.managed_resource_group_name, null)
-  managed_services_cmk_key_vault_key_id               = try(var.managed_services_cmk_key_vault_key_id, null)
   managed_services_cmk_key_vault_id                   = try(var.managed_services_cmk_key_vault_id, null)
+  managed_services_cmk_key_vault_key_id               = try(var.managed_services_cmk_key_vault_key_id, null)
   network_security_group_rules_required               = try(var.network_security_group_rules_required, null)
   public_network_access_enabled                       = try(var.public_network_access_enabled, null)
   tags                                                = var.tags
@@ -40,7 +40,6 @@ resource "azurerm_databricks_workspace" "this" {
       vnet_address_prefix                                  = lookup(custom_parameters.value, "vnet_address_prefix", "10.139")
     }
   }
-
   dynamic "enhanced_security_compliance" {
     for_each = var.enhanced_security_compliance != null ? [var.enhanced_security_compliance] : []
 

@@ -203,6 +203,51 @@ If it is set to false, then no telemetry will be collected.
 DESCRIPTION
 }
 
+variable "enhanced_security_compliance" {
+  type = object({
+    automatic_cluster_update_enabled      = optional(bool, false)
+    compliance_security_profile_enabled   = optional(bool, false)
+    compliance_security_profile_standards = optional(list(string), [])
+    enhanced_security_monitoring_enabled  = optional(bool, false)
+  })
+  default     = null
+  description = <<DESCRIPTION
+Enhanced Security and Compliance configuration for the Databricks Workspace. This feature is only valid if sku is set to 'premium'.
+
+- `automatic_cluster_update_enabled` - (Optional) Enables automatic cluster updates for this workspace. Defaults to false.
+- `compliance_security_profile_enabled` - (Optional) Enables compliance security profile for this workspace. Defaults to false.
+  NOTE: Changing the value of compliance_security_profile_enabled from true to false forces a replacement of the Databricks workspace.
+  NOTE: The attributes automatic_cluster_update_enabled and enhanced_security_monitoring_enabled must be set to true in order to set compliance_security_profile_enabled to true.
+- `compliance_security_profile_standards` - (Optional) A list of standards to enforce on this workspace. Possible values include 'HIPAA', 'PCI_DSS', 'HITRUST', 'IRAP_PROTECTED', 'UK_CYBER_ESSENTIALS_PLUS', 'CANADA_PROTECTED_B', or 'NONE'.
+  NOTE: compliance_security_profile_enabled must be set to true in order to use compliance_security_profile_standards.
+  NOTE: Removing a standard from the compliance_security_profile_standards list forces a replacement of the Databricks workspace.
+- `enhanced_security_monitoring_enabled` - (Optional) Enables enhanced security monitoring for this workspace. Defaults to false.
+  DESCRIPTION
+
+  validation {
+    condition = var.enhanced_security_compliance == null || (
+      var.enhanced_security_compliance.compliance_security_profile_enabled == false ||
+      (var.enhanced_security_compliance.automatic_cluster_update_enabled == true &&
+      var.enhanced_security_compliance.enhanced_security_monitoring_enabled == true)
+    )
+    error_message = "When compliance_security_profile_enabled is true, both automatic_cluster_update_enabled and enhanced_security_monitoring_enabled must be set to true."
+  }
+  validation {
+    condition = var.enhanced_security_compliance == null || (
+      var.enhanced_security_compliance.compliance_security_profile_enabled == true ||
+      length(var.enhanced_security_compliance.compliance_security_profile_standards) == 0
+    )
+    error_message = "compliance_security_profile_standards can only be set when compliance_security_profile_enabled is true."
+  }
+  validation {
+    condition = var.enhanced_security_compliance == null || alltrue([
+      for standard in var.enhanced_security_compliance.compliance_security_profile_standards :
+      contains(["HIPAA", "PCI_DSS", "HITRUST", "IRAP_PROTECTED", "UK_CYBER_ESSENTIALS_PLUS", "CANADA_PROTECTED_B", "NONE"], standard)
+    ])
+    error_message = "compliance_security_profile_standards must only contain valid values: 'HIPAA', 'PCI_DSS', 'HITRUST', 'IRAP_PROTECTED', 'UK_CYBER_ESSENTIALS_PLUS', 'CANADA_PROTECTED_B', or 'NONE'."
+  }
+}
+
 variable "infrastructure_encryption_enabled" {
   type        = bool
   default     = false
@@ -244,6 +289,19 @@ variable "lock" {
   }
 }
 
+variable "managed_disk_cmk_key_vault_id" {
+  type        = string
+  default     = null
+  description = <<DESCRIPTION
+    Resource ID of the Key Vault which contains the managed_disk_cmk_key_vault_key_id key.
+
+    NOTE: The managed_disk_cmk_key_vault_id field is only required if the Key Vault exists in a different subscription than the Databricks Workspace.
+    If the managed_disk_cmk_key_vault_id field is not specified it is assumed that the managed_disk_cmk_key_vault_key_id is hosted in the same subscription as the Databricks Workspace.
+
+    NOTE: If you are using multiple service principals to execute Terraform across subscriptions you will need to add an additional azurerm_key_vault_access_policy resource granting the service principal access to the key vault in that subscription.
+  DESCRIPTION
+}
+
 variable "managed_disk_cmk_key_vault_key_id" {
   type        = string
   default     = null
@@ -264,19 +322,6 @@ variable "managed_disk_cmk_rotation_to_latest_version_enabled" {
   description = "Whether customer managed keys for disk encryption will automatically be rotated to the latest version. Optional."
 }
 
-variable "managed_disk_cmk_key_vault_id" {
-  type        = string
-  default     = null
-  description = <<DESCRIPTION
-    Resource ID of the Key Vault which contains the managed_disk_cmk_key_vault_key_id key.
-
-    NOTE: The managed_disk_cmk_key_vault_id field is only required if the Key Vault exists in a different subscription than the Databricks Workspace.
-    If the managed_disk_cmk_key_vault_id field is not specified it is assumed that the managed_disk_cmk_key_vault_key_id is hosted in the same subscription as the Databricks Workspace.
-
-    NOTE: If you are using multiple service principals to execute Terraform across subscriptions you will need to add an additional azurerm_key_vault_access_policy resource granting the service principal access to the key vault in that subscription.
-  DESCRIPTION
-}
-
 variable "managed_resource_group_name" {
   type        = string
   default     = null
@@ -285,6 +330,19 @@ variable "managed_resource_group_name" {
   Changing this forces a new resource to be created.
 
   NOTE: Make sure that this field is unique if you have multiple Databrick Workspaces deployed in your subscription and choose to not have the managed_resource_group_name auto generated by the Azure Resource Provider. Having multiple Databrick Workspaces deployed in the same subscription with the same manage_resource_group_name may result in some resources that cannot be deleted.
+  DESCRIPTION
+}
+
+variable "managed_services_cmk_key_vault_id" {
+  type        = string
+  default     = null
+  description = <<DESCRIPTION
+    Resource ID of the Key Vault which contains the managed_services_cmk_key_vault_key_id key.
+
+    NOTE: The managed_services_cmk_key_vault_id field is only required if the Key Vault exists in a different subscription than the Databricks Workspace.
+    If the managed_services_cmk_key_vault_id field is not specified it is assumed that the managed_services_cmk_key_vault_key_id is hosted in the same subscription as the Databricks Workspace.
+
+    NOTE: If you are using multiple service principals to execute Terraform across subscriptions you will need to add an additional azurerm_key_vault_access_policy resource granting the service principal access to the key vault in that subscription.
   DESCRIPTION
 }
 
@@ -305,19 +363,6 @@ variable "managed_services_cmk_key_vault_key_id" {
 
     NOTE: Disabling Managed Services (aka CMK for Notebook) is currently not supported. If you want to disable Managed Services, you must delete the workspace and create a new one.
 
-  DESCRIPTION
-}
-
-variable "managed_services_cmk_key_vault_id" {
-  type        = string
-  default     = null
-  description = <<DESCRIPTION
-    Resource ID of the Key Vault which contains the managed_services_cmk_key_vault_key_id key.
-
-    NOTE: The managed_services_cmk_key_vault_id field is only required if the Key Vault exists in a different subscription than the Databricks Workspace.
-    If the managed_services_cmk_key_vault_id field is not specified it is assumed that the managed_services_cmk_key_vault_key_id is hosted in the same subscription as the Databricks Workspace.
-
-    NOTE: If you are using multiple service principals to execute Terraform across subscriptions you will need to add an additional azurerm_key_vault_access_policy resource granting the service principal access to the key vault in that subscription.
   DESCRIPTION
 }
 
@@ -468,51 +513,4 @@ A map of virtual network peering configurations. The map key is deliberately arb
 - `use_remote_gateways` - (Optional) Can remote gateways be used on the Databricks virtual network? Defaults to false.
                           If the use_remote_gateways is set to true, and allow_gateway_transit on the remote peering is also true, the virtual network will use the gateways of the remote virtual network for transit. Only one peering can have this flag set to true. use_remote_gateways cannot be set if the virtual network already has a gateway.
 DESCRIPTION
-}
-
-variable "enhanced_security_compliance" {
-  type = object({
-    automatic_cluster_update_enabled      = optional(bool, false)
-    compliance_security_profile_enabled   = optional(bool, false)
-    compliance_security_profile_standards = optional(list(string), [])
-    enhanced_security_monitoring_enabled  = optional(bool, false)
-  })
-  default = null
-  description = <<DESCRIPTION
-Enhanced Security and Compliance configuration for the Databricks Workspace. This feature is only valid if sku is set to 'premium'.
-
-- `automatic_cluster_update_enabled` - (Optional) Enables automatic cluster updates for this workspace. Defaults to false.
-- `compliance_security_profile_enabled` - (Optional) Enables compliance security profile for this workspace. Defaults to false.
-  NOTE: Changing the value of compliance_security_profile_enabled from true to false forces a replacement of the Databricks workspace.
-  NOTE: The attributes automatic_cluster_update_enabled and enhanced_security_monitoring_enabled must be set to true in order to set compliance_security_profile_enabled to true.
-- `compliance_security_profile_standards` - (Optional) A list of standards to enforce on this workspace. Possible values include 'HIPAA', 'PCI_DSS', 'HITRUST', 'IRAP_PROTECTED', 'UK_CYBER_ESSENTIALS_PLUS', 'CANADA_PROTECTED_B', or 'NONE'.
-  NOTE: compliance_security_profile_enabled must be set to true in order to use compliance_security_profile_standards.
-  NOTE: Removing a standard from the compliance_security_profile_standards list forces a replacement of the Databricks workspace.
-- `enhanced_security_monitoring_enabled` - (Optional) Enables enhanced security monitoring for this workspace. Defaults to false.
-  DESCRIPTION
-
-  validation {
-    condition = var.enhanced_security_compliance == null || (
-      var.enhanced_security_compliance.compliance_security_profile_enabled == false ||
-      (var.enhanced_security_compliance.automatic_cluster_update_enabled == true &&
-       var.enhanced_security_compliance.enhanced_security_monitoring_enabled == true)
-    )
-    error_message = "When compliance_security_profile_enabled is true, both automatic_cluster_update_enabled and enhanced_security_monitoring_enabled must be set to true."
-  }
-
-  validation {
-    condition = var.enhanced_security_compliance == null || (
-      var.enhanced_security_compliance.compliance_security_profile_enabled == true ||
-      length(var.enhanced_security_compliance.compliance_security_profile_standards) == 0
-    )
-    error_message = "compliance_security_profile_standards can only be set when compliance_security_profile_enabled is true."
-  }
-
-  validation {
-    condition = var.enhanced_security_compliance == null || alltrue([
-      for standard in var.enhanced_security_compliance.compliance_security_profile_standards :
-      contains(["HIPAA", "PCI_DSS", "HITRUST", "IRAP_PROTECTED", "UK_CYBER_ESSENTIALS_PLUS", "CANADA_PROTECTED_B", "NONE"], standard)
-    ])
-    error_message = "compliance_security_profile_standards must only contain valid values: 'HIPAA', 'PCI_DSS', 'HITRUST', 'IRAP_PROTECTED', 'UK_CYBER_ESSENTIALS_PLUS', 'CANADA_PROTECTED_B', or 'NONE'."
-  }
 }
