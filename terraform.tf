@@ -1,10 +1,10 @@
 terraform {
-  required_version = ">= 1.6.0"
+  required_version = ">= 1.6, < 2.0"
+
   required_providers {
-    # TODO: Ensure all required providers are listed here.
     azurerm = {
       source  = "hashicorp/azurerm"
-      version = ">= 3.71.0"
+      version = ">= 3.117, < 5.0.0"
     }
     modtm = {
       source  = "Azure/modtm"
@@ -12,7 +12,7 @@ terraform {
     }
     random = {
       source  = "hashicorp/random"
-      version = ">= 3.5.0"
+      version = "~> 3.5"
     }
   }
 }

@@ -7,12 +7,16 @@ resource "azurerm_databricks_workspace" "this" {
   name                                                = var.name
   resource_group_name                                 = var.resource_group_name
   sku                                                 = var.sku
+  access_connector_id                                 = var.default_storage_firewall_enabled == true ? var.access_connector_id : try(var.access_connector_id, null)
   customer_managed_key_enabled                        = try(var.customer_managed_key_enabled, null)
+  default_storage_firewall_enabled                    = var.default_storage_firewall_enabled == true ? true : null
   infrastructure_encryption_enabled                   = try(var.infrastructure_encryption_enabled, null)
   load_balancer_backend_address_pool_id               = try(var.load_balancer_backend_address_pool_id, null)
+  managed_disk_cmk_key_vault_id                       = try(var.managed_disk_cmk_key_vault_id, null)
   managed_disk_cmk_key_vault_key_id                   = try(var.managed_disk_cmk_key_vault_key_id, null)
   managed_disk_cmk_rotation_to_latest_version_enabled = var.managed_disk_cmk_key_vault_key_id != null && var.managed_disk_cmk_rotation_to_latest_version_enabled != null ? var.managed_disk_cmk_rotation_to_latest_version_enabled : null
   managed_resource_group_name                         = try(var.managed_resource_group_name, null)
+  managed_services_cmk_key_vault_id                   = try(var.managed_services_cmk_key_vault_id, null)
   managed_services_cmk_key_vault_key_id               = try(var.managed_services_cmk_key_vault_key_id, null)
   network_security_group_rules_required               = try(var.network_security_group_rules_required, null)
   public_network_access_enabled                       = try(var.public_network_access_enabled, null)
@@ -20,6 +24,7 @@ resource "azurerm_databricks_workspace" "this" {
 
   dynamic "custom_parameters" {
     for_each = var.custom_parameters != {} ? [var.custom_parameters] : []
+
     content {
       machine_learning_workspace_id                        = lookup(custom_parameters.value, "machine_learning_workspace_id", null)
       nat_gateway_name                                     = lookup(custom_parameters.value, "nat_gateway_name", "nat-gateway")
@@ -33,6 +38,16 @@ resource "azurerm_databricks_workspace" "this" {
       storage_account_sku_name                             = lookup(custom_parameters.value, "storage_account_sku_name", "Standard_GRS")
       virtual_network_id                                   = lookup(custom_parameters.value, "virtual_network_id", null)
       vnet_address_prefix                                  = lookup(custom_parameters.value, "vnet_address_prefix", "10.139")
+    }
+  }
+  dynamic "enhanced_security_compliance" {
+    for_each = var.enhanced_security_compliance != null ? [var.enhanced_security_compliance] : []
+
+    content {
+      automatic_cluster_update_enabled      = enhanced_security_compliance.value.automatic_cluster_update_enabled
+      compliance_security_profile_enabled   = enhanced_security_compliance.value.compliance_security_profile_enabled
+      compliance_security_profile_standards = enhanced_security_compliance.value.compliance_security_profile_standards
+      enhanced_security_monitoring_enabled  = enhanced_security_compliance.value.enhanced_security_monitoring_enabled
     }
   }
 }
@@ -72,12 +87,14 @@ resource "azurerm_monitor_diagnostic_setting" "this" {
 
   dynamic "enabled_log" {
     for_each = each.value.log_categories
+
     content {
       category = enabled_log.value
     }
   }
   dynamic "enabled_log" {
     for_each = each.value.log_groups
+
     content {
       category_group = enabled_log.value
     }

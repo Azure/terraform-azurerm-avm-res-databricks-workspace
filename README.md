@@ -8,23 +8,13 @@ Manages a Databricks Workspace
 
 The following requirements are needed by this module:
 
-- <a name="requirement_terraform"></a> [terraform](#requirement\_terraform) (>= 1.6.0)
+- <a name="requirement_terraform"></a> [terraform](#requirement\_terraform) (>= 1.6, < 2.0)
 
-- <a name="requirement_azurerm"></a> [azurerm](#requirement\_azurerm) (>= 3.71.0)
+- <a name="requirement_azurerm"></a> [azurerm](#requirement\_azurerm) (>= 3.117, < 5.0.0)
 
 - <a name="requirement_modtm"></a> [modtm](#requirement\_modtm) (~> 0.3)
 
-- <a name="requirement_random"></a> [random](#requirement\_random) (>= 3.5.0)
-
-## Providers
-
-The following providers are used by this module:
-
-- <a name="provider_azurerm"></a> [azurerm](#provider\_azurerm) (>= 3.71.0)
-
-- <a name="provider_modtm"></a> [modtm](#provider\_modtm) (~> 0.3)
-
-- <a name="provider_random"></a> [random](#provider\_random) (>= 3.5.0)
+- <a name="requirement_random"></a> [random](#requirement\_random) (~> 3.5)
 
 ## Resources
 
@@ -109,6 +99,15 @@ map(object({
 
 Default: `{}`
 
+### <a name="input_access_connector_id"></a> [access\_connector\_id](#input\_access\_connector\_id)
+
+Description:   The ID of the Databricks Access Connector to provide access to the workspace.  
+  The access\_connector\_id field is required when default\_storage\_firewall\_enabled is set to true.
+
+Type: `string`
+
+Default: `null`
+
 ### <a name="input_custom_parameters"></a> [custom\_parameters](#input\_custom\_parameters)
 
 Description: A map of custom parameters for configuring the Databricks Workspace. This object allows for detailed configuration, with each attribute representing a specific setting:
@@ -168,6 +167,14 @@ Type: `string`
 
 Default: `null`
 
+### <a name="input_default_storage_firewall_enabled"></a> [default\_storage\_firewall\_enabled](#input\_default\_storage\_firewall\_enabled)
+
+Description:   Disallow public access to default storage account. Defaults to false.
+
+Type: `bool`
+
+Default: `false`
+
 ### <a name="input_diagnostic_settings"></a> [diagnostic\_settings](#input\_diagnostic\_settings)
 
 Description: A map of diagnostic settings to create on the storage account. The map key is deliberately arbitrary to avoid issues where map keys maybe unknown at plan time.
@@ -212,6 +219,32 @@ Type: `bool`
 
 Default: `true`
 
+### <a name="input_enhanced_security_compliance"></a> [enhanced\_security\_compliance](#input\_enhanced\_security\_compliance)
+
+Description: Enhanced Security and Compliance configuration for the Databricks Workspace. This feature is only valid if sku is set to 'premium'.
+
+- `automatic_cluster_update_enabled` - (Optional) Enables automatic cluster updates for this workspace. Defaults to false.
+- `compliance_security_profile_enabled` - (Optional) Enables compliance security profile for this workspace. Defaults to false.  
+  NOTE: Changing the value of compliance\_security\_profile\_enabled from true to false forces a replacement of the Databricks workspace.  
+  NOTE: The attributes automatic\_cluster\_update\_enabled and enhanced\_security\_monitoring\_enabled must be set to true in order to set compliance\_security\_profile\_enabled to true.
+- `compliance_security_profile_standards` - (Optional) A list of standards to enforce on this workspace. Possible values include 'HIPAA', 'PCI\_DSS', 'HITRUST', 'IRAP\_PROTECTED', 'UK\_CYBER\_ESSENTIALS\_PLUS', 'CANADA\_PROTECTED\_B', or 'NONE'.  
+  NOTE: compliance\_security\_profile\_enabled must be set to true in order to use compliance\_security\_profile\_standards.  
+  NOTE: Removing a standard from the compliance\_security\_profile\_standards list forces a replacement of the Databricks workspace.
+- `enhanced_security_monitoring_enabled` - (Optional) Enables enhanced security monitoring for this workspace. Defaults to false.
+
+Type:
+
+```hcl
+object({
+    automatic_cluster_update_enabled      = optional(bool, false)
+    compliance_security_profile_enabled   = optional(bool, false)
+    compliance_security_profile_standards = optional(list(string), [])
+    enhanced_security_monitoring_enabled  = optional(bool, false)
+  })
+```
+
+Default: `null`
+
 ### <a name="input_infrastructure_encryption_enabled"></a> [infrastructure\_encryption\_enabled](#input\_infrastructure\_encryption\_enabled)
 
 Description:   By default, Azure encrypts storage account data at rest. Infrastructure encryption adds a second layer of encryption to your storage account's data  
@@ -249,6 +282,19 @@ object({
 
 Default: `null`
 
+### <a name="input_managed_disk_cmk_key_vault_id"></a> [managed\_disk\_cmk\_key\_vault\_id](#input\_managed\_disk\_cmk\_key\_vault\_id)
+
+Description:     Resource ID of the Key Vault which contains the managed\_disk\_cmk\_key\_vault\_key\_id key.
+
+    NOTE: The managed\_disk\_cmk\_key\_vault\_id field is only required if the Key Vault exists in a different subscription than the Databricks Workspace.  
+    If the managed\_disk\_cmk\_key\_vault\_id field is not specified it is assumed that the managed\_disk\_cmk\_key\_vault\_key\_id is hosted in the same subscription as the Databricks Workspace.
+
+    NOTE: If you are using multiple service principals to execute Terraform across subscriptions you will need to add an additional azurerm\_key\_vault\_access\_policy resource granting the service principal access to the key vault in that subscription.
+
+Type: `string`
+
+Default: `null`
+
 ### <a name="input_managed_disk_cmk_key_vault_key_id"></a> [managed\_disk\_cmk\_key\_vault\_key\_id](#input\_managed\_disk\_cmk\_key\_vault\_key\_id)
 
 Description:   Customer managed encryption properties for the Databricks Workspace managed disks.
@@ -277,6 +323,19 @@ Description:   The name of the resource group where Azure should place the manag
   Changing this forces a new resource to be created.
 
   NOTE: Make sure that this field is unique if you have multiple Databrick Workspaces deployed in your subscription and choose to not have the managed\_resource\_group\_name auto generated by the Azure Resource Provider. Having multiple Databrick Workspaces deployed in the same subscription with the same manage\_resource\_group\_name may result in some resources that cannot be deleted.
+
+Type: `string`
+
+Default: `null`
+
+### <a name="input_managed_services_cmk_key_vault_id"></a> [managed\_services\_cmk\_key\_vault\_id](#input\_managed\_services\_cmk\_key\_vault\_id)
+
+Description:     Resource ID of the Key Vault which contains the managed\_services\_cmk\_key\_vault\_key\_id key.
+
+    NOTE: The managed\_services\_cmk\_key\_vault\_id field is only required if the Key Vault exists in a different subscription than the Databricks Workspace.  
+    If the managed\_services\_cmk\_key\_vault\_id field is not specified it is assumed that the managed\_services\_cmk\_key\_vault\_key\_id is hosted in the same subscription as the Databricks Workspace.
+
+    NOTE: If you are using multiple service principals to execute Terraform across subscriptions you will need to add an additional azurerm\_key\_vault\_access\_policy resource granting the service principal access to the key vault in that subscription.
 
 Type: `string`
 

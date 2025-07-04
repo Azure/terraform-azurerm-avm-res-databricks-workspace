@@ -12,18 +12,20 @@ The default deployment of Azure Databricks is a fully managed service on Azure: 
 
 ```hcl
 terraform {
-  required_version = ">= 1.0.0"
+  required_version = ">= 1.6, < 2.0"
+
   required_providers {
     azurerm = {
       source  = "hashicorp/azurerm"
-      version = ">= 3.7.0, < 4.0.0"
+      version = ">= 3.117, < 5.0.0"
     }
     random = {
       source  = "hashicorp/random"
-      version = ">= 3.5.0, < 4.0.0"
+      version = "~> 3.5"
     }
   }
 }
+
 
 provider "azurerm" {
   features {}
@@ -61,10 +63,10 @@ resource "azurerm_resource_group" "this" {
 
 # A vnet is required for vnet injection.
 resource "azurerm_virtual_network" "this" {
-  address_space       = ["10.0.0.0/16"]
   location            = azurerm_resource_group.this.location
   name                = module.naming.virtual_network.name_unique
   resource_group_name = azurerm_resource_group.this.name
+  address_space       = ["10.0.0.0/16"]
 }
 # A host (public) subnet is required for vnet injection.
 resource "azurerm_subnet" "public" {
@@ -121,94 +123,34 @@ resource "azurerm_subnet_network_security_group_association" "private" {
   network_security_group_id = azurerm_network_security_group.this.id
   subnet_id                 = azurerm_subnet.private.id
 }
+
 resource "azurerm_subnet_network_security_group_association" "public" {
   network_security_group_id = azurerm_network_security_group.this.id
   subnet_id                 = azurerm_subnet.public.id
 }
+
 # A network security group is required for vnet injection.
 resource "azurerm_network_security_group" "this" {
   location            = azurerm_resource_group.this.location
   name                = "databricks-nsg"
   resource_group_name = azurerm_resource_group.this.name
-
-  security_rule {
-    access                     = "Allow"
-    description                = "Required for worker nodes communication within a cluster."
-    destination_address_prefix = "VirtualNetwork"
-    destination_port_range     = "*"
-    direction                  = "Inbound"
-    name                       = "Microsoft.Databricks-workspaces_UseOnly_databricks-worker-to-worker-inbound"
-    priority                   = 100
-    protocol                   = "*"
-    source_address_prefix      = "VirtualNetwork"
-    source_port_range          = "*"
-  }
-  security_rule {
-    access                     = "Allow"
-    description                = "Required for workers communication with Databricks Webapp."
-    destination_address_prefix = "AzureDatabricks"
-    destination_port_range     = "443"
-    direction                  = "Outbound"
-    name                       = "Microsoft.Databricks-workspaces_UseOnly_databricks-worker-to-databricks-webapp"
-    priority                   = 100
-    protocol                   = "Tcp"
-    source_address_prefix      = "VirtualNetwork"
-    source_port_range          = "*"
-  }
-  security_rule {
-    access                     = "Allow"
-    description                = "Required for workers communication with Azure SQL services."
-    destination_address_prefix = "Sql"
-    destination_port_range     = "3306"
-    direction                  = "Outbound"
-    name                       = "Microsoft.Databricks-workspaces_UseOnly_databricks-worker-to-sql"
-    priority                   = 101
-    protocol                   = "Tcp"
-    source_address_prefix      = "VirtualNetwork"
-    source_port_range          = "*"
-  }
-  security_rule {
-    access                     = "Allow"
-    description                = "Required for workers communication with Azure Storage services."
-    destination_address_prefix = "Storage"
-    destination_port_range     = "443"
-    direction                  = "Outbound"
-    name                       = "Microsoft.Databricks-workspaces_UseOnly_databricks-worker-to-storage"
-    priority                   = 102
-    protocol                   = "Tcp"
-    source_address_prefix      = "VirtualNetwork"
-    source_port_range          = "*"
-  }
-  security_rule {
-    access                     = "Allow"
-    description                = "Required for worker nodes communication within a cluster."
-    destination_address_prefix = "VirtualNetwork"
-    destination_port_range     = "*"
-    direction                  = "Outbound"
-    name                       = "Microsoft.Databricks-workspaces_UseOnly_databricks-worker-to-worker-outbound"
-    priority                   = 103
-    protocol                   = "*"
-    source_address_prefix      = "VirtualNetwork"
-    source_port_range          = "*"
-  }
-  security_rule {
-    access                     = "Allow"
-    description                = "Required for worker communication with Azure Eventhub services."
-    destination_address_prefix = "EventHub"
-    destination_port_range     = "9093"
-    direction                  = "Outbound"
-    name                       = "Microsoft.Databricks-workspaces_UseOnly_databricks-worker-to-eventhub"
-    priority                   = 104
-    protocol                   = "Tcp"
-    source_address_prefix      = "VirtualNetwork"
-    source_port_range          = "*"
-  }
 }
 
 # A private DNS zone for the private endpoint.
 resource "azurerm_private_dns_zone" "azuredatabricks" {
   name                = "privatelink.azuredatabricks.net"
   resource_group_name = azurerm_resource_group.this.name
+}
+
+# create access connector for Databricks workspace
+resource "azurerm_databricks_access_connector" "this" {
+  location            = azurerm_resource_group.this.location
+  name                = "${module.naming.databricks_workspace.name_unique}-access-connector"
+  resource_group_name = azurerm_resource_group.this.name
+
+  identity {
+    type = "SystemAssigned"
+  }
 }
 
 # Create DataBricks workspace with vnet injection and private endpoint.
@@ -218,9 +160,8 @@ module "databricks" {
   location            = "uk south"
   name                = module.naming.databricks_workspace.name_unique
   resource_group_name = azurerm_resource_group.this.name
-
-  sku                           = "premium"
-  public_network_access_enabled = true
+  sku                 = "premium"
+  access_connector_id = azurerm_databricks_access_connector.this.id
   custom_parameters = {
     no_public_ip                                         = true
     public_subnet_name                                   = azurerm_subnet.public.name
@@ -229,19 +170,28 @@ module "databricks" {
     private_subnet_network_security_group_association_id = azurerm_subnet_network_security_group_association.private.id
     virtual_network_id                                   = azurerm_virtual_network.this.id
   }
-
+  default_storage_firewall_enabled      = true
+  network_security_group_rules_required = "NoAzureDatabricksRules" # "AllRules", Required when public_network_access_enabled is set to false.
   private_endpoints = {
     databricks_ui_api = {
-      subresource_name              = "databricks_ui_api"
-      location                      = azurerm_resource_group.this.location
-      private_dns_zone_resource_ids = [azurerm_private_dns_zone.azuredatabricks.id]
-      subnet_resource_id            = azurerm_subnet.privateendpoint.id
+      name                            = "${module.naming.private_endpoint.name_unique}-databricks-ui-api"
+      private_service_connection_name = "${module.naming.private_endpoint.name_unique}-pse-databricks-ui-api"
+      subresource_name                = "databricks_ui_api"
+      location                        = azurerm_resource_group.this.location
+      private_dns_zone_resource_ids   = [azurerm_private_dns_zone.azuredatabricks.id]
+      subnet_resource_id              = azurerm_subnet.privateendpoint.id
     }
+    # browser_authentication = {
+    #   name                            = "${module.naming.private_endpoint.name_unique}-browser-authentication"
+    #   private_service_connection_name = "${module.naming.private_endpoint.name_unique}-pse-browser-authentication"
+    #   subresource_name                = "browser_authentication"
+    #   location                        = azurerm_resource_group.this.location
+    #   private_dns_zone_resource_ids   = [azurerm_private_dns_zone.azuredatabricks.id]
+    #   subnet_resource_id              = azurerm_subnet.privateendpoint.id
+    # }
   }
+  public_network_access_enabled = true
 }
-
-
-
 ```
 
 <!-- markdownlint-disable MD033 -->
@@ -249,24 +199,17 @@ module "databricks" {
 
 The following requirements are needed by this module:
 
-- <a name="requirement_terraform"></a> [terraform](#requirement\_terraform) (>= 1.0.0)
+- <a name="requirement_terraform"></a> [terraform](#requirement\_terraform) (>= 1.6, < 2.0)
 
-- <a name="requirement_azurerm"></a> [azurerm](#requirement\_azurerm) (>= 3.7.0, < 4.0.0)
+- <a name="requirement_azurerm"></a> [azurerm](#requirement\_azurerm) (>= 3.117, < 5.0.0)
 
-- <a name="requirement_random"></a> [random](#requirement\_random) (>= 3.5.0, < 4.0.0)
-
-## Providers
-
-The following providers are used by this module:
-
-- <a name="provider_azurerm"></a> [azurerm](#provider\_azurerm) (>= 3.7.0, < 4.0.0)
-
-- <a name="provider_random"></a> [random](#provider\_random) (>= 3.5.0, < 4.0.0)
+- <a name="requirement_random"></a> [random](#requirement\_random) (~> 3.5)
 
 ## Resources
 
 The following resources are used by this module:
 
+- [azurerm_databricks_access_connector.this](https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/resources/databricks_access_connector) (resource)
 - [azurerm_network_security_group.this](https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/resources/network_security_group) (resource)
 - [azurerm_private_dns_zone.azuredatabricks](https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/resources/private_dns_zone) (resource)
 - [azurerm_resource_group.this](https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/resources/resource_group) (resource)

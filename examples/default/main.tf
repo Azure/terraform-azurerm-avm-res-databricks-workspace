@@ -1,16 +1,18 @@
 terraform {
-  required_version = ">= 1.6.0"
+  required_version = ">= 1.6, < 2.0"
+
   required_providers {
     azurerm = {
       source  = "hashicorp/azurerm"
-      version = ">= 3.7.0, < 4.0.0"
+      version = ">= 3.117, < 5.0.0"
     }
     random = {
       source  = "hashicorp/random"
-      version = ">= 3.5.0, < 4.0.0"
+      version = "~> 3.5"
     }
   }
 }
+
 
 provider "azurerm" {
   features {}
@@ -49,8 +51,8 @@ module "databricks" {
   source = "../.."
 
   location            = "uk south"
-  enable_telemetry    = var.enable_telemetry
   name                = module.naming.databricks_workspace.name_unique
   resource_group_name = azurerm_resource_group.this.name
   sku                 = "standard"
+  enable_telemetry    = var.enable_telemetry
 }
