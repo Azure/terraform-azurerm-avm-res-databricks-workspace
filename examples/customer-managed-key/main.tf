@@ -2,13 +2,13 @@ terraform {
   required_version = ">= 1.6, < 2.0"
 
   required_providers {
-    azurerm = {
-      source  = "hashicorp/azurerm"
-      version = ">= 3.117, < 5.0.0"
-    }
     azuread = {
       source  = "hashicorp/azuread"
       version = ">= 2.15.0"
+    }
+    azurerm = {
+      source  = "hashicorp/azurerm"
+      version = ">= 3.117, < 5.0.0"
     }
     modtm = {
       source  = "Azure/modtm"

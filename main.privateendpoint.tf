@@ -14,11 +14,6 @@ resource "azurerm_private_endpoint" "this" {
     private_connection_resource_id = azurerm_databricks_workspace.this.id
     subresource_names              = [each.value.subresource_name]
   }
-
-  # Ensure databricks workspace is fully created before creating endpoints
-  depends_on = [
-    azurerm_databricks_workspace.this
-  ]
   dynamic "ip_configuration" {
     for_each = each.value.ip_configurations
 
@@ -37,6 +32,11 @@ resource "azurerm_private_endpoint" "this" {
       private_dns_zone_ids = each.value.private_dns_zone_resource_ids
     }
   }
+
+  # Ensure databricks workspace is fully created before creating endpoints
+  depends_on = [
+    azurerm_databricks_workspace.this
+  ]
 }
 
 resource "azurerm_private_endpoint_application_security_group_association" "this" {

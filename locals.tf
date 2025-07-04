@@ -1,12 +1,11 @@
 locals {
-  resource_group_location            = try(data.azurerm_resource_group.parent.location, null)
-  role_definition_resource_substring = "/providers/Microsoft.Authorization/roleDefinitions"
-
-  # Create ordered list of private endpoint keys to ensure sequential creation
-  private_endpoint_keys = keys(var.private_endpoints)
   private_endpoint_dependencies = {
     for idx, key in local.private_endpoint_keys : key => idx > 0 ? [local.private_endpoint_keys[idx - 1]] : []
   }
+  # Create ordered list of private endpoint keys to ensure sequential creation
+  private_endpoint_keys              = keys(var.private_endpoints)
+  resource_group_location            = try(data.azurerm_resource_group.parent.location, null)
+  role_definition_resource_substring = "/providers/Microsoft.Authorization/roleDefinitions"
 }
 
 locals {

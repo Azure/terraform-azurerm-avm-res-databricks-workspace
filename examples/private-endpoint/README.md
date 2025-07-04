@@ -12,19 +12,24 @@ The default deployment of Azure Databricks is a fully managed service on Azure: 
 
 ```hcl
 terraform {
-  required_version = ">= 1.0.0"
+  required_version = ">= 1.6, < 2.0"
 
   required_providers {
     azurerm = {
       source  = "hashicorp/azurerm"
-      version = "~> 4.0"
+      version = ">= 3.117, < 5.0.0"
+    }
+    modtm = {
+      source  = "Azure/modtm"
+      version = "~> 0.3"
     }
     random = {
       source  = "hashicorp/random"
-      version = ">= 3.5.0, < 4.0.0"
+      version = "~> 3.5"
     }
   }
 }
+
 
 provider "azurerm" {
   features {}
@@ -150,7 +155,7 @@ resource "azurerm_network_security_group" "this" {
     access                     = "Allow"
     description                = "Required for workers communication with Databricks Webapp."
     destination_address_prefix = "AzureDatabricks"
-    destination_port_range     = "443"
+    destination_port_ranges    = ["443", "3306", "8443-8451"]
     direction                  = "Outbound"
     name                       = "Microsoft.Databricks-workspaces_UseOnly_databricks-worker-to-databricks-webapp"
     priority                   = 100
@@ -214,6 +219,17 @@ resource "azurerm_private_dns_zone" "azuredatabricks" {
   resource_group_name = azurerm_resource_group.this.name
 }
 
+# create access connector for Databricks workspace
+resource "azurerm_databricks_access_connector" "this" {
+  location            = azurerm_resource_group.this.location
+  name                = "${module.naming.databricks_workspace.name_unique}-access-connector"
+  resource_group_name = azurerm_resource_group.this.name
+
+  identity {
+    type = "SystemAssigned"
+  }
+}
+
 # Create DataBricks workspace with vnet injection and private endpoint.
 module "databricks" {
   source = "../.."
@@ -222,6 +238,7 @@ module "databricks" {
   name                = module.naming.databricks_workspace.name_unique
   resource_group_name = azurerm_resource_group.this.name
   sku                 = "premium"
+  access_connector_id = azurerm_databricks_access_connector.this.id
   custom_parameters = {
     no_public_ip                                         = true
     public_subnet_name                                   = azurerm_subnet.public.name
@@ -230,6 +247,8 @@ module "databricks" {
     private_subnet_network_security_group_association_id = azurerm_subnet_network_security_group_association.private.id
     virtual_network_id                                   = azurerm_virtual_network.this.id
   }
+  default_storage_firewall_enabled      = true
+  network_security_group_rules_required = "NoAzureDatabricksRules" # "AllRules", Required when public_network_access_enabled is set to false.
   private_endpoints = {
     databricks_ui_api = {
       name                            = "${module.naming.private_endpoint.name_unique}-databricks-ui-api"
@@ -250,9 +269,6 @@ module "databricks" {
   }
   public_network_access_enabled = true
 }
-
-
-
 ```
 
 <!-- markdownlint-disable MD033 -->
@@ -260,16 +276,19 @@ module "databricks" {
 
 The following requirements are needed by this module:
 
-- <a name="requirement_terraform"></a> [terraform](#requirement\_terraform) (>= 1.0.0)
+- <a name="requirement_terraform"></a> [terraform](#requirement\_terraform) (>= 1.6, < 2.0)
 
-- <a name="requirement_azurerm"></a> [azurerm](#requirement\_azurerm) (~> 4.0)
+- <a name="requirement_azurerm"></a> [azurerm](#requirement\_azurerm) (>= 3.117, < 5.0.0)
 
-- <a name="requirement_random"></a> [random](#requirement\_random) (>= 3.5.0, < 4.0.0)
+- <a name="requirement_modtm"></a> [modtm](#requirement\_modtm) (~> 0.3)
+
+- <a name="requirement_random"></a> [random](#requirement\_random) (~> 3.5)
 
 ## Resources
 
 The following resources are used by this module:
 
+- [azurerm_databricks_access_connector.this](https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/resources/databricks_access_connector) (resource)
 - [azurerm_network_security_group.this](https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/resources/network_security_group) (resource)
 - [azurerm_private_dns_zone.azuredatabricks](https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/resources/private_dns_zone) (resource)
 - [azurerm_resource_group.this](https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/resources/resource_group) (resource)
