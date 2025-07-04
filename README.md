@@ -16,8 +16,6 @@ The following requirements are needed by this module:
 
 - <a name="requirement_random"></a> [random](#requirement\_random) (~> 3.5)
 
-- <a name="requirement_time"></a> [time](#requirement\_time) (>= 0.9.0)
-
 ## Resources
 
 The following resources are used by this module:
