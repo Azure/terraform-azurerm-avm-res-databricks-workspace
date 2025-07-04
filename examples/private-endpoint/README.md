@@ -253,15 +253,15 @@ module "databricks" {
       location                        = azurerm_resource_group.this.location
       private_dns_zone_resource_ids   = [azurerm_private_dns_zone.azuredatabricks.id]
       subnet_resource_id              = azurerm_subnet.privateendpoint.id
-    },
-    browser_authentication = {
-      name                            = "${module.naming.private_endpoint.name_unique}-browser-authentication"
-      private_service_connection_name = "${module.naming.private_endpoint.name_unique}-pse-browser-authentication"
-      subresource_name                = "browser_authentication"
-      location                        = azurerm_resource_group.this.location
-      private_dns_zone_resource_ids   = [azurerm_private_dns_zone.azuredatabricks.id]
-      subnet_resource_id              = azurerm_subnet.privateendpoint.id
     }
+    # browser_authentication = {
+    #   name                            = "${module.naming.private_endpoint.name_unique}-browser-authentication"
+    #   private_service_connection_name = "${module.naming.private_endpoint.name_unique}-pse-browser-authentication"
+    #   subresource_name                = "browser_authentication"
+    #   location                        = azurerm_resource_group.this.location
+    #   private_dns_zone_resource_ids   = [azurerm_private_dns_zone.azuredatabricks.id]
+    #   subnet_resource_id              = azurerm_subnet.privateendpoint.id
+    # }
   }
   public_network_access_enabled = true
 }
