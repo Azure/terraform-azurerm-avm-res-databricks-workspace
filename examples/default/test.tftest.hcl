@@ -47,4 +47,19 @@ run "default_example_apply" {
     condition     = module.databricks.databricks_workspace_id != null
     error_message = "Databricks workspace ID should be populated after apply"
   }
+
+  assert {
+    condition     = output.databricks_workspace_id != null
+    error_message = "Output databricks_workspace_id should be populated"
+  }
+
+  assert {
+    condition     = output.databricks_workspace_url != null
+    error_message = "Output databricks_workspace_url should be populated"
+  }
+
+  assert {
+    condition     = output.resource_group_name == azurerm_resource_group.this.name
+    error_message = "Output resource_group_name should match created resource group"
+  }
 }

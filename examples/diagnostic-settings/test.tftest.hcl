@@ -57,4 +57,14 @@ run "diagnostic_settings_example_apply" {
     condition     = azurerm_log_analytics_workspace.this.id != null
     error_message = "Log Analytics workspace ID should be populated after apply"
   }
+
+  assert {
+    condition     = output.log_analytics_workspace_id == azurerm_log_analytics_workspace.this.id
+    error_message = "Output log_analytics_workspace_id should match created workspace"
+  }
+
+  assert {
+    condition     = output.databricks_workspace_id != null
+    error_message = "Output databricks_workspace_id should be populated"
+  }
 }

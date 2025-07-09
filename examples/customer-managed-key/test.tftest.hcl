@@ -83,4 +83,19 @@ run "customer_managed_key_example_apply" {
     condition     = module.databricks.databricks_workspace_storage_account_identity != null
     error_message = "Storage account identity should be created after apply"
   }
+
+  assert {
+    condition     = output.managed_disk_identity != null
+    error_message = "Output managed_disk_identity should be populated"
+  }
+
+  assert {
+    condition     = output.storage_account_identity != null
+    error_message = "Output storage_account_identity should be populated"
+  }
+
+  assert {
+    condition     = output.key_vault_id == azurerm_key_vault.this.id
+    error_message = "Output key_vault_id should match created Key Vault"
+  }
 }

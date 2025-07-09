@@ -73,4 +73,14 @@ run "private_endpoint_example_apply" {
     condition     = length(module.databricks.private_endpoints) > 0
     error_message = "Private endpoints should be created after apply"
   }
+
+  assert {
+    condition     = output.private_endpoints != null
+    error_message = "Output private_endpoints should be populated"
+  }
+
+  assert {
+    condition     = output.virtual_network_id == azurerm_virtual_network.this.id
+    error_message = "Output virtual_network_id should match created VNet"
+  }
 }
