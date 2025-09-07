@@ -32,14 +32,6 @@ variable "sku" {
   }
 }
 
-variable "private_endpoints_manage_dns_zone_group" {
-  type        = bool
-  default     = true
-  description = "Whether to manage private DNS zone groups with this module. If set to false, you must manage private DNS zone groups externally, e.g. using Azure Policy."
-  nullable    = false
-}
-
-
 variable "access_connector" {
   type = map(object({
     name                = string
@@ -448,6 +440,13 @@ variable "private_endpoints" {
     - `name` - The name of the IP configuration.
     - `private_ip_address` - The private IP address of the IP configuration.
   DESCRIPTION
+  nullable    = false
+}
+
+variable "private_endpoints_manage_dns_zone_group" {
+  type        = bool
+  default     = true
+  description = "Whether to manage private DNS zone groups with this module. If set to false, you must manage private DNS zone groups externally, e.g. using Azure Policy."
   nullable    = false
 }
 
