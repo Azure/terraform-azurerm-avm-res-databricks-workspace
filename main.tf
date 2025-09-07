@@ -7,7 +7,7 @@ resource "azurerm_databricks_workspace" "this" {
   name                                                = var.name
   resource_group_name                                 = var.resource_group_name
   sku                                                 = var.sku
-  access_connector_id                                 = var.default_storage_firewall_enabled == true ? var.access_connector_id : try(var.access_connector_id, null)
+  access_connector_id                                 = var.access_connector_id != null ? var.access_connector_id : null
   customer_managed_key_enabled                        = try(var.customer_managed_key_enabled, null)
   default_storage_firewall_enabled                    = var.default_storage_firewall_enabled == true ? true : null
   infrastructure_encryption_enabled                   = try(var.infrastructure_encryption_enabled, null)
