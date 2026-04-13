@@ -140,6 +140,27 @@ variable "dbfs_root_cmk_key_vault_key_id" {
   DESCRIPTION
 }
 
+variable "default_catalog" {
+  type = object({
+    initial_type = optional(string, "HiveMetastore")
+    initial_name = optional(string, null)
+  })
+  default     = null
+  description = <<DESCRIPTION
+Configuration for the default catalog of the Databricks Workspace. This enables Unity Catalog, which is required for Azure Databricks Serverless SQL and Serverless Compute.
+
+- `initial_type` - (Optional) Defines the initial type of the default catalog. Possible values are `HiveMetastore` and `UnityCatalog`. Set to `UnityCatalog` to enable Unity Catalog for Serverless capabilities. Defaults to `HiveMetastore`.
+  NOTE: Once set to `UnityCatalog`, this cannot be reverted without recreating the workspace.
+  NOTE: Requires the workspace `sku` to be set to `premium`.
+- `initial_name` - (Optional) Specifies the initial name of the default catalog. If not specified, the name of the workspace will be used.
+  DESCRIPTION
+
+  validation {
+    condition     = var.default_catalog == null || contains(["HiveMetastore", "UnityCatalog"], var.default_catalog.initial_type)
+    error_message = "The 'initial_type' value must be one of 'HiveMetastore' or 'UnityCatalog'."
+  }
+}
+
 variable "default_storage_firewall_enabled" {
   type        = bool
   default     = false

@@ -123,6 +123,24 @@ resource "azurerm_databricks_virtual_network_peering" "this" {
   use_remote_gateways           = each.value.use_remote_gateways != null ? each.value.use_remote_gateways : false
 }
 
+resource "azapi_update_resource" "default_catalog" {
+  count = var.default_catalog != null ? 1 : 0
+
+  resource_id = azurerm_databricks_workspace.this.id
+  type        = "Microsoft.Databricks/workspaces@2024-05-01"
+
+  body = {
+    properties = {
+      defaultCatalog = {
+        initialType = var.default_catalog.initial_type
+        initialName = var.default_catalog.initial_name
+      }
+    }
+  }
+
+  response_export_values = []
+}
+
 resource "azurerm_databricks_access_connector" "this" {
   for_each = var.access_connector
 
