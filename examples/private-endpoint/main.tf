@@ -42,7 +42,7 @@ module "naming" {
   version = "0.4.1"
 }
 
-# This is required for resource modules
+# This is required for resource modules 3
 resource "azurerm_resource_group" "this" {
   location = "uk south"
   name     = module.naming.resource_group.name_unique
