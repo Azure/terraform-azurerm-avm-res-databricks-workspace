@@ -271,13 +271,13 @@ Version:
 
 Source: Azure/naming/azurerm
 
-Version: 0.4.1
+Version: 0.4.3
 
 ### <a name="module_regions"></a> [regions](#module\_regions)
 
 Source: Azure/regions/azurerm
 
-Version: >= 0.8.0
+Version: 0.8.2
 
 <!-- markdownlint-disable-next-line MD041 -->
 ## Data Collection
