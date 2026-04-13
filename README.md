@@ -23,6 +23,7 @@ The following requirements are needed by this module:
 
 The following resources are used by this module:
 
+- [azapi_update_resource.default_catalog](https://registry.terraform.io/providers/Azure/azapi/latest/docs/resources/update_resource) (resource)
 - [azurerm_databricks_access_connector.this](https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/resources/databricks_access_connector) (resource)
 - [azurerm_databricks_virtual_network_peering.this](https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/resources/databricks_virtual_network_peering) (resource)
 - [azurerm_databricks_workspace.this](https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/resources/databricks_workspace) (resource)
@@ -167,6 +168,26 @@ Description:     The ID of the customer-managed key for DBFS root.
     This is required when customer\_managed\_key\_enabled is set to true.
 
 Type: `string`
+
+Default: `null`
+
+### <a name="input_default_catalog"></a> [default\_catalog](#input\_default\_catalog)
+
+Description: Configuration for the default catalog of the Databricks Workspace. This enables Unity Catalog, which is required for Azure Databricks Serverless SQL and Serverless Compute.
+
+- `initial_type` - (Optional) Defines the initial type of the default catalog. Possible values are `HiveMetastore` and `UnityCatalog`. Set to `UnityCatalog` to enable Unity Catalog for Serverless capabilities. Defaults to `HiveMetastore`.  
+  NOTE: Once set to `UnityCatalog`, this cannot be reverted without recreating the workspace.  
+  NOTE: Requires the workspace `sku` to be set to `premium`.
+- `initial_name` - (Optional) Specifies the initial name of the default catalog. If not specified, the name of the workspace will be used.
+
+Type:
+
+```hcl
+object({
+    initial_type = optional(string, "HiveMetastore")
+    initial_name = optional(string, null)
+  })
+```
 
 Default: `null`
 

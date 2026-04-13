@@ -67,10 +67,9 @@ module "databricks" {
   resource_group_name = azurerm_resource_group.this.name
   sku                 = "premium"
   access_connector_id = azurerm_databricks_access_connector.this.id
-  enable_telemetry    = var.enable_telemetry
-
   # Enable Unity Catalog as the default catalog, which is required for Serverless SQL and Serverless Compute.
   default_catalog = {
     initial_type = "UnityCatalog"
   }
+  enable_telemetry = var.enable_telemetry
 }

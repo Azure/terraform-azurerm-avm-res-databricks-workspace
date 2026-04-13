@@ -128,7 +128,6 @@ resource "azapi_update_resource" "default_catalog" {
 
   resource_id = azurerm_databricks_workspace.this.id
   type        = "Microsoft.Databricks/workspaces@2024-05-01"
-
   body = {
     properties = {
       defaultCatalog = {
@@ -137,8 +136,9 @@ resource "azapi_update_resource" "default_catalog" {
       }
     }
   }
-
+  read_headers           = var.enable_telemetry ? { "User-Agent" : local.avm_azapi_header } : null
   response_export_values = []
+  update_headers         = var.enable_telemetry ? { "User-Agent" : local.avm_azapi_header } : null
 }
 
 resource "azurerm_databricks_access_connector" "this" {
