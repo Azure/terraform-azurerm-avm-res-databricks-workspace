@@ -29,7 +29,7 @@ data "azurerm_client_config" "this" {}
 module "regions" {
   # checkov:skip=CKV_TF_1
   source  = "Azure/regions/azurerm"
-  version = ">= 0.8.0"
+  version = "0.8.2"
 }
 
 # This allows us to randomize the region for the resource group.
@@ -42,7 +42,7 @@ resource "random_integer" "region_index" {
 module "naming" {
   # checkov:skip=CKV_TF_1
   source  = "Azure/naming/azurerm"
-  version = "0.4.1"
+  version = "0.4.3"
 }
 
 # This is required for resource modules
