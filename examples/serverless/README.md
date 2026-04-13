@@ -58,17 +58,6 @@ resource "azurerm_resource_group" "this" {
   name     = module.naming.resource_group.name_unique
 }
 
-# An Access Connector with a system-assigned managed identity is required for Unity Catalog.
-resource "azurerm_databricks_access_connector" "this" {
-  location            = azurerm_resource_group.this.location
-  name                = "${module.naming.databricks_workspace.name_unique}-access-connector"
-  resource_group_name = azurerm_resource_group.this.name
-
-  identity {
-    type = "SystemAssigned"
-  }
-}
-
 # Deploy a Databricks workspace with Unity Catalog enabled for Serverless SQL and Serverless Compute.
 module "databricks" {
   source = "../.."
@@ -77,7 +66,6 @@ module "databricks" {
   name                = module.naming.databricks_workspace.name_unique
   resource_group_name = azurerm_resource_group.this.name
   sku                 = "premium"
-  access_connector_id = azurerm_databricks_access_connector.this.id
   # Enable Unity Catalog as the default catalog, which is required for Serverless SQL and Serverless Compute.
   default_catalog = {
     initial_type = "UnityCatalog"
@@ -101,7 +89,6 @@ The following requirements are needed by this module:
 
 The following resources are used by this module:
 
-- [azurerm_databricks_access_connector.this](https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/resources/databricks_access_connector) (resource)
 - [azurerm_resource_group.this](https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/resources/resource_group) (resource)
 - [random_integer.region_index](https://registry.terraform.io/providers/hashicorp/random/latest/docs/resources/integer) (resource)
 
