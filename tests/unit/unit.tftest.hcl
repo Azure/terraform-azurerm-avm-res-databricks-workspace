@@ -1,5 +1,5 @@
 mock_provider "azapi" {
-  mock_resource "azapi_update_resource" {
+  mock_resource "azapi_resource_action" {
     defaults = {
       id = "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/rg-test/providers/Microsoft.Databricks/workspaces/test"
     }
@@ -50,8 +50,8 @@ run "default_catalog_not_created_when_null" {
   }
 
   assert {
-    condition     = length(azapi_update_resource.default_catalog) == 0
-    error_message = "azapi_update_resource.default_catalog should not be created when default_catalog is null"
+    condition     = length(azapi_resource_action.default_catalog) == 0
+    error_message = "azapi_resource_action.default_catalog should not be created when default_catalog is null"
   }
 }
 
@@ -66,12 +66,12 @@ run "default_catalog_created_with_unity_catalog" {
   }
 
   assert {
-    condition     = length(azapi_update_resource.default_catalog) == 1
-    error_message = "azapi_update_resource.default_catalog should be created when default_catalog is set"
+    condition     = length(azapi_resource_action.default_catalog) == 1
+    error_message = "azapi_resource_action.default_catalog should be created when default_catalog is set"
   }
 
   assert {
-    condition     = azapi_update_resource.default_catalog[0].body.properties.defaultCatalog.initialType == "UnityCatalog"
+    condition     = azapi_resource_action.default_catalog[0].body.properties.defaultCatalog.initialType == "UnityCatalog"
     error_message = "defaultCatalog initialType should be UnityCatalog"
   }
 }
@@ -87,12 +87,12 @@ run "default_catalog_created_with_hive_metastore" {
   }
 
   assert {
-    condition     = length(azapi_update_resource.default_catalog) == 1
-    error_message = "azapi_update_resource.default_catalog should be created when default_catalog is set"
+    condition     = length(azapi_resource_action.default_catalog) == 1
+    error_message = "azapi_resource_action.default_catalog should be created when default_catalog is set"
   }
 
   assert {
-    condition     = azapi_update_resource.default_catalog[0].body.properties.defaultCatalog.initialType == "HiveMetastore"
+    condition     = azapi_resource_action.default_catalog[0].body.properties.defaultCatalog.initialType == "HiveMetastore"
     error_message = "defaultCatalog initialType should be HiveMetastore"
   }
 }
@@ -108,12 +108,12 @@ run "default_catalog_created_with_initial_name" {
   }
 
   assert {
-    condition     = length(azapi_update_resource.default_catalog) == 1
-    error_message = "azapi_update_resource.default_catalog should be created when default_catalog is set"
+    condition     = length(azapi_resource_action.default_catalog) == 1
+    error_message = "azapi_resource_action.default_catalog should be created when default_catalog is set"
   }
 
   assert {
-    condition     = azapi_update_resource.default_catalog[0].body.properties.defaultCatalog.initialName == "my-catalog"
+    condition     = azapi_resource_action.default_catalog[0].body.properties.defaultCatalog.initialName == "my-catalog"
     error_message = "defaultCatalog initialName should be my-catalog"
   }
 }

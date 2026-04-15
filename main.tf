@@ -123,22 +123,20 @@ resource "azurerm_databricks_virtual_network_peering" "this" {
   use_remote_gateways           = each.value.use_remote_gateways != null ? each.value.use_remote_gateways : false
 }
 
-resource "azapi_update_resource" "default_catalog" {
+resource "azapi_resource_action" "default_catalog" {
   count = var.default_catalog != null ? 1 : 0
 
+  method      = "PATCH"
   resource_id = azurerm_databricks_workspace.this.id
   type        = "Microsoft.Databricks/workspaces@2024-05-01"
-  body = {
+  body = jsondecode(jsonencode({
     properties = {
       defaultCatalog = {
         initialType = var.default_catalog.initial_type
         initialName = var.default_catalog.initial_name
       }
     }
-  }
-  read_headers           = var.enable_telemetry ? { "User-Agent" : local.avm_azapi_header } : null
-  response_export_values = []
-  update_headers         = var.enable_telemetry ? { "User-Agent" : local.avm_azapi_header } : null
+  }))
 }
 
 resource "azurerm_databricks_access_connector" "this" {
