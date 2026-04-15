@@ -128,7 +128,7 @@ resource "azapi_resource_action" "default_catalog" {
 
   method      = "PATCH"
   resource_id = azurerm_databricks_workspace.this.id
-  type        = "Microsoft.Databricks/workspaces@2024-05-01"
+  type        = "Microsoft.Databricks/workspaces@2026-01-01"
   body = jsondecode(jsonencode({
     properties = {
       defaultCatalog = {
