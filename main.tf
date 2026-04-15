@@ -131,10 +131,14 @@ resource "azapi_resource_action" "default_catalog" {
   type        = "Microsoft.Databricks/workspaces@2026-01-01"
   body = jsondecode(jsonencode({
     properties = {
-      defaultCatalog = {
-        initialType = var.default_catalog.initial_type
-        initialName = var.default_catalog.initial_name
-      }
+      defaultCatalog = merge(
+        {
+          initialType = var.default_catalog.initial_type
+        },
+        var.default_catalog.initial_name != null ? {
+          initialName = var.default_catalog.initial_name
+        } : {}
+      )
     }
   }))
 }
