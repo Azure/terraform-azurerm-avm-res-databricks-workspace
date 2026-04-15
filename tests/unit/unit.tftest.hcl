@@ -132,3 +132,22 @@ run "default_catalog_invalid_initial_type" {
     var.default_catalog,
   ]
 }
+
+run "access_connector_without_storage_firewall_sets_false_explicitly" {
+  command = plan
+
+  variables {
+    access_connector_id              = "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test-rg/providers/Microsoft.Databricks/accessConnectors/test"
+    default_storage_firewall_enabled = false
+  }
+
+  assert {
+    condition     = azurerm_databricks_workspace.this.access_connector_id == var.access_connector_id
+    error_message = "Databricks Workspace access_connector_id did not match expected"
+  }
+
+  assert {
+    condition     = azurerm_databricks_workspace.this.default_storage_firewall_enabled == false
+    error_message = "Databricks Workspace default_storage_firewall_enabled should be explicitly false when access_connector_id is set"
+  }
+}
