@@ -64,7 +64,10 @@ Type: `string`
 
 ### <a name="input_sku"></a> [sku](#input\_sku)
 
-Description:   The 'sku' value must be one of 'standard', 'premium', or 'trial'.  
+Description:   The 'sku' value must be one of 'standard', 'premium', or 'trial'.
+
+  IMPORTANT: The `standard` sku will be deprecated in October 2026, please use `premium` sku instead, for more information please visit https://learn.microsoft.com/azure/databricks/admin/account-settings/standard-tier
+
   NOTE: Downgrading to a trial sku from a standard or premium sku will force a new resource to be created.
 
 Type: `string`

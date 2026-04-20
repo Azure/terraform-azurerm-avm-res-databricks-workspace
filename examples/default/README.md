@@ -57,10 +57,10 @@ resource "azurerm_resource_group" "this" {
 module "databricks" {
   source = "../.."
 
-  location            = "uk south"
+  location            = "uksouth"
   name                = module.naming.databricks_workspace.name_unique
   resource_group_name = azurerm_resource_group.this.name
-  sku                 = "standard"
+  sku                 = "premium"
   enable_telemetry    = var.enable_telemetry
 }
 ```
