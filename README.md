@@ -30,6 +30,7 @@ The following resources are used by this module:
 - [azurerm_management_lock.this](https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/resources/management_lock) (resource)
 - [azurerm_monitor_diagnostic_setting.this](https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/resources/monitor_diagnostic_setting) (resource)
 - [azurerm_private_endpoint.this](https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/resources/private_endpoint) (resource)
+- [azurerm_private_endpoint.this_unmanaged_dns_zone_groups](https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/resources/private_endpoint) (resource)
 - [azurerm_private_endpoint_application_security_group_association.this](https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/resources/private_endpoint_application_security_group_association) (resource)
 - [azurerm_role_assignment.this](https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/resources/role_assignment) (resource)
 - [modtm_telemetry.telemetry](https://registry.terraform.io/providers/Azure/modtm/latest/docs/resources/telemetry) (resource)
@@ -63,7 +64,10 @@ Type: `string`
 
 ### <a name="input_sku"></a> [sku](#input\_sku)
 
-Description:   The 'sku' value must be one of 'standard', 'premium', or 'trial'.  
+Description:   The 'sku' value must be one of 'standard', 'premium', or 'trial'.
+
+  IMPORTANT: The `standard` sku will be deprecated in October 2026, please use `premium` sku instead, for more information please visit https://learn.microsoft.com/azure/databricks/admin/account-settings/standard-tier
+
   NOTE: Downgrading to a trial sku from a standard or premium sku will force a new resource to be created.
 
 Type: `string`
@@ -440,6 +444,14 @@ map(object({
 ```
 
 Default: `{}`
+
+### <a name="input_private_endpoints_manage_dns_zone_group"></a> [private\_endpoints\_manage\_dns\_zone\_group](#input\_private\_endpoints\_manage\_dns\_zone\_group)
+
+Description: Whether to manage private DNS zone groups with this module. If set to false, you must manage private DNS zone groups externally, e.g. using Azure Policy.
+
+Type: `bool`
+
+Default: `true`
 
 ### <a name="input_public_network_access_enabled"></a> [public\_network\_access\_enabled](#input\_public\_network\_access\_enabled)
 
