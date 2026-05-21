@@ -11,7 +11,7 @@ resource "azurerm_private_endpoint" "this" {
   private_service_connection {
     is_manual_connection           = false
     name                           = each.value.private_service_connection_name != null ? each.value.private_service_connection_name : "pse-${var.name}-${each.key}"
-    private_connection_resource_id = azurerm_databricks_workspace.this.id
+    private_connection_resource_id = azapi_resource.this.id
     subresource_names              = [each.value.subresource_name]
   }
   dynamic "ip_configuration" {
@@ -35,7 +35,7 @@ resource "azurerm_private_endpoint" "this" {
 
   # Ensure databricks workspace is fully created before creating endpoints
   depends_on = [
-    azurerm_databricks_workspace.this
+    azapi_resource.this
   ]
 }
 
@@ -59,7 +59,7 @@ resource "azurerm_private_endpoint" "this_unmanaged_dns_zone_groups" {
   private_service_connection {
     is_manual_connection           = false
     name                           = each.value.private_service_connection_name != null ? each.value.private_service_connection_name : "pse-${var.name}-${each.key}"
-    private_connection_resource_id = azurerm_databricks_workspace.this.id
+    private_connection_resource_id = azapi_resource.this.id
     subresource_names              = [each.value.subresource_name]
   }
   dynamic "ip_configuration" {
