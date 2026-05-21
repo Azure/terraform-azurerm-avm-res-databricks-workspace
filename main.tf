@@ -29,8 +29,6 @@ resource "azapi_resource" "this" {
   schema_validation_enabled = false
   tags                      = var.tags
   update_headers            = var.enable_telemetry ? { "User-Agent" : local.avm_azapi_header } : null
-
-  # lifecycle preconditions for deprecated Key Vault id inputs removed
 }
 
 resource "azurerm_management_lock" "this" {
