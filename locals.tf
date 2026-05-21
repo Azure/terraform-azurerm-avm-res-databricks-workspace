@@ -155,28 +155,25 @@ locals {
 }
 
 locals {
+  workspace_encryption_serverless = local.workspace_encryption_managed_services != null ? {
+    entities = {
+      managedServices = local.workspace_encryption_managed_services
+    }
+  } : null
   workspace_properties = { for k, v in local.workspace_properties_raw : k => v if v != null }
-  workspace_properties_raw = local.is_serverless ? {
-    accessConnector            = null
-    computeMode                = "Serverless"
-    defaultCatalog             = null
-    defaultStorageFirewall     = null
-    encryption                 = local.workspace_encryption_managed_services != null ? { entities = { managedServices = local.workspace_encryption_managed_services } } : null
-    enhancedSecurityCompliance = local.workspace_enhanced_security_compliance
-    managedResourceGroupId     = null
-    parameters                 = null
-    publicNetworkAccess        = var.public_network_access_enabled ? "Enabled" : "Disabled"
-    requiredNsgRules           = null
-    } : {
-    accessConnector            = local.workspace_access_connector
-    computeMode                = "Hybrid"
-    defaultCatalog             = local.workspace_default_catalog
-    defaultStorageFirewall     = var.access_connector_id != null || var.default_storage_firewall_enabled ? (var.default_storage_firewall_enabled ? "Enabled" : "Disabled") : null
+  # Built as a single object with per-attribute conditionals on is_serverless to
+  # avoid the "inconsistent conditional result types" Terraform error that
+  # occurs when the two ternary branches have differently-typed object values.
+  workspace_properties_raw = {
+    accessConnector            = local.is_serverless ? null : local.workspace_access_connector
+    computeMode                = local.is_serverless ? "Serverless" : "Hybrid"
+    defaultCatalog             = local.is_serverless ? null : local.workspace_default_catalog
+    defaultStorageFirewall     = local.is_serverless ? null : (var.access_connector_id != null || var.default_storage_firewall_enabled ? (var.default_storage_firewall_enabled ? "Enabled" : "Disabled") : null)
     encryption                 = local.workspace_encryption
     enhancedSecurityCompliance = local.workspace_enhanced_security_compliance
-    managedResourceGroupId     = local.managed_resource_group_id
-    parameters                 = length(local.workspace_custom_parameters) > 0 ? local.workspace_custom_parameters : null
+    managedResourceGroupId     = local.is_serverless ? null : local.managed_resource_group_id
+    parameters                 = local.is_serverless ? null : (length(local.workspace_custom_parameters) > 0 ? local.workspace_custom_parameters : null)
     publicNetworkAccess        = var.public_network_access_enabled ? "Enabled" : "Disabled"
-    requiredNsgRules           = var.network_security_group_rules_required
+    requiredNsgRules           = local.is_serverless ? null : var.network_security_group_rules_required
   }
 }

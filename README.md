@@ -614,7 +614,7 @@ Description:   A managed\_disk\_identity block as documented below
 
 ### <a name="output_databricks_workspace_managed_resource_group_id"></a> [databricks\_workspace\_managed\_resource\_group\_id](#output\_databricks\_workspace\_managed\_resource\_group\_id)
 
-Description: The ID of the Managed Resource Group created by the Databricks Workspace.
+Description: The ID of the Managed Resource Group created by the Databricks Workspace. Returns null when compute\_mode is Serverless because Databricks does not provision a managed resource group in that mode.
 
 ### <a name="output_databricks_workspace_storage_account_identity"></a> [databricks\_workspace\_storage\_account\_identity](#output\_databricks\_workspace\_storage\_account\_identity)
 

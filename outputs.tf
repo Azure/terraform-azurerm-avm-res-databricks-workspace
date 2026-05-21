@@ -35,7 +35,7 @@ output "databricks_workspace_disk_encryption_set_id" {
 
 output "databricks_workspace_id" {
   description = "The unique identifier of the databricks workspace in Databricks control plane."
-  value       = azapi_resource.this.output.properties.workspaceId
+  value       = try(azapi_resource.this.output.properties.workspaceId, null)
 }
 
 output "databricks_workspace_managed_disk_identity" {
@@ -54,8 +54,8 @@ output "databricks_workspace_managed_disk_identity" {
 }
 
 output "databricks_workspace_managed_resource_group_id" {
-  description = "The ID of the Managed Resource Group created by the Databricks Workspace."
-  value       = azapi_resource.this.output.properties.managedResourceGroupId
+  description = "The ID of the Managed Resource Group created by the Databricks Workspace. Returns null when compute_mode is Serverless because Databricks does not provision a managed resource group in that mode."
+  value       = try(azapi_resource.this.output.properties.managedResourceGroupId, null)
 }
 
 output "databricks_workspace_storage_account_identity" {
@@ -75,7 +75,7 @@ output "databricks_workspace_storage_account_identity" {
 
 output "databricks_workspace_url" {
   description = "The workspace URL which is of the format 'adb-{workspaceId}.{random}.azuredatabricks.net'."
-  value       = azapi_resource.this.output.properties.workspaceUrl
+  value       = try(azapi_resource.this.output.properties.workspaceUrl, null)
 }
 
 output "name" {
