@@ -9,7 +9,7 @@ resource "azurerm_databricks_workspace" "this" {
   sku                                                 = var.sku
   access_connector_id                                 = var.access_connector_id != null ? var.access_connector_id : null
   customer_managed_key_enabled                        = try(var.customer_managed_key_enabled, null)
-  default_storage_firewall_enabled                    = var.default_storage_firewall_enabled == true ? true : null
+  default_storage_firewall_enabled                    = var.access_connector_id != null || var.default_storage_firewall_enabled ? var.default_storage_firewall_enabled : null
   infrastructure_encryption_enabled                   = try(var.infrastructure_encryption_enabled, null)
   load_balancer_backend_address_pool_id               = try(var.load_balancer_backend_address_pool_id, null)
   managed_disk_cmk_key_vault_id                       = try(var.managed_disk_cmk_key_vault_id, null)
