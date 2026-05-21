@@ -155,11 +155,6 @@ locals {
 }
 
 locals {
-  workspace_encryption_serverless = local.workspace_encryption_managed_services != null ? {
-    entities = {
-      managedServices = local.workspace_encryption_managed_services
-    }
-  } : null
   workspace_properties = { for k, v in local.workspace_properties_raw : k => v if v != null }
   # Built as a single object with per-attribute conditionals on is_serverless to
   # avoid the "inconsistent conditional result types" Terraform error that
