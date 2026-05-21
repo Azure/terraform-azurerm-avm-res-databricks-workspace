@@ -76,6 +76,26 @@ variable "access_connector_id" {
   }
 }
 
+variable "compute_mode" {
+  type        = string
+  default     = "Hybrid"
+  description = <<DESCRIPTION
+  The Databricks Workspace compute mode. Required on create and cannot be changed after creation.
+
+  Possible values are:
+  - `Hybrid` (default): A traditional Azure Databricks workspace that supports VNet injection, Customer-Managed Keys, custom parameters, managed disk encryption, default catalog (Unity Catalog), default storage firewall, access connectors, etc. Unity Catalog enablement via `default_catalog.initial_type = "UnityCatalog"` is what unlocks Serverless SQL and Serverless Compute on a Hybrid workspace.
+  - `Serverless`: A workspace that runs exclusively on the Azure Databricks Serverless compute plane. Most networking, parameters and disk encryption settings are not allowed on this mode and are silently ignored if supplied.
+
+  NOTE: Changing this value forces replacement of the Databricks Workspace.
+  DESCRIPTION
+  nullable    = false
+
+  validation {
+    condition     = contains(["Hybrid", "Serverless"], var.compute_mode)
+    error_message = "The 'compute_mode' value must be one of 'Hybrid' or 'Serverless'."
+  }
+}
+
 variable "custom_parameters" {
   type = object({
     machine_learning_workspace_id                        = optional(string, null)
@@ -142,6 +162,29 @@ variable "dbfs_root_cmk_key_vault_key_id" {
     The ID of the customer-managed key for DBFS root.
     This is required when customer_managed_key_enabled is set to true.
   DESCRIPTION
+}
+
+variable "default_catalog" {
+  type = object({
+    initial_type = optional(string, "HiveMetastore")
+    initial_name = optional(string, null)
+  })
+  default     = null
+  description = <<DESCRIPTION
+Configuration for the default catalog of the Databricks Workspace. Enabling Unity Catalog through this variable is required to use Azure Databricks Serverless SQL and Serverless Compute on a Hybrid workspace.
+
+- `initial_type` - (Optional) Defines the initial type of the default catalog. Possible values are `HiveMetastore` and `UnityCatalog`. Set to `UnityCatalog` to enable Unity Catalog for Serverless capabilities. Defaults to `HiveMetastore`.
+  NOTE: Once set to `UnityCatalog`, this cannot be reverted without recreating the workspace.
+  NOTE: Requires the workspace `sku` to be set to `premium`.
+- `initial_name` - (Optional) Specifies the initial name of the default catalog. If not specified, the name of the workspace will be used.
+
+NOTE: This setting is only valid on a Hybrid `compute_mode` workspace; it is silently ignored on Serverless workspaces because ARM rejects `defaultCatalog` on Serverless compute mode.
+DESCRIPTION
+
+  validation {
+    condition     = var.default_catalog == null || contains(["HiveMetastore", "UnityCatalog"], coalesce(try(var.default_catalog.initial_type, null), "HiveMetastore"))
+    error_message = "The 'initial_type' value must be one of 'HiveMetastore' or 'UnityCatalog'."
+  }
 }
 
 variable "default_storage_firewall_enabled" {

@@ -2,54 +2,33 @@ data "azurerm_resource_group" "parent" {
   name = var.resource_group_name
 }
 
-resource "azurerm_databricks_workspace" "this" {
-  location                                            = coalesce(var.location, local.resource_group_location)
-  name                                                = var.name
-  resource_group_name                                 = var.resource_group_name
-  sku                                                 = var.sku
-  access_connector_id                                 = var.access_connector_id != null ? var.access_connector_id : null
-  customer_managed_key_enabled                        = try(var.customer_managed_key_enabled, null)
-  default_storage_firewall_enabled                    = var.access_connector_id != null || var.default_storage_firewall_enabled ? var.default_storage_firewall_enabled : null
-  infrastructure_encryption_enabled                   = try(var.infrastructure_encryption_enabled, null)
-  load_balancer_backend_address_pool_id               = try(var.load_balancer_backend_address_pool_id, null)
-  managed_disk_cmk_key_vault_id                       = try(var.managed_disk_cmk_key_vault_id, null)
-  managed_disk_cmk_key_vault_key_id                   = try(var.managed_disk_cmk_key_vault_key_id, null)
-  managed_disk_cmk_rotation_to_latest_version_enabled = var.managed_disk_cmk_key_vault_key_id != null && var.managed_disk_cmk_rotation_to_latest_version_enabled != null ? var.managed_disk_cmk_rotation_to_latest_version_enabled : null
-  managed_resource_group_name                         = try(var.managed_resource_group_name, null)
-  managed_services_cmk_key_vault_id                   = try(var.managed_services_cmk_key_vault_id, null)
-  managed_services_cmk_key_vault_key_id               = try(var.managed_services_cmk_key_vault_key_id, null)
-  network_security_group_rules_required               = try(var.network_security_group_rules_required, null)
-  public_network_access_enabled                       = try(var.public_network_access_enabled, null)
-  tags                                                = var.tags
+data "azapi_client_config" "this" {}
 
-  dynamic "custom_parameters" {
-    for_each = var.custom_parameters != {} ? [var.custom_parameters] : []
-
-    content {
-      machine_learning_workspace_id                        = lookup(custom_parameters.value, "machine_learning_workspace_id", null)
-      nat_gateway_name                                     = lookup(custom_parameters.value, "nat_gateway_name", "nat-gateway")
-      no_public_ip                                         = lookup(custom_parameters.value, "no_public_ip", false)
-      private_subnet_name                                  = lookup(custom_parameters.value, "private_subnet_name", null)
-      private_subnet_network_security_group_association_id = lookup(custom_parameters.value, "private_subnet_network_security_group_association_id", null)
-      public_ip_name                                       = lookup(custom_parameters.value, "public_ip_name", "nat-gw-public-ip")
-      public_subnet_name                                   = lookup(custom_parameters.value, "public_subnet_name", null)
-      public_subnet_network_security_group_association_id  = lookup(custom_parameters.value, "public_subnet_network_security_group_association_id", null)
-      storage_account_name                                 = lookup(custom_parameters.value, "storage_account_name", null)
-      storage_account_sku_name                             = lookup(custom_parameters.value, "storage_account_sku_name", "Standard_GRS")
-      virtual_network_id                                   = lookup(custom_parameters.value, "virtual_network_id", null)
-      vnet_address_prefix                                  = lookup(custom_parameters.value, "vnet_address_prefix", "10.139")
+resource "azapi_resource" "this" {
+  location  = coalesce(var.location, local.resource_group_location)
+  name      = var.name
+  parent_id = data.azurerm_resource_group.parent.id
+  type      = "Microsoft.Databricks/workspaces@2026-01-01"
+  body = {
+    sku = {
+      name = var.sku
     }
+    properties = local.workspace_properties
   }
-  dynamic "enhanced_security_compliance" {
-    for_each = var.enhanced_security_compliance != null ? [var.enhanced_security_compliance] : []
-
-    content {
-      automatic_cluster_update_enabled      = enhanced_security_compliance.value.automatic_cluster_update_enabled
-      compliance_security_profile_enabled   = enhanced_security_compliance.value.compliance_security_profile_enabled
-      compliance_security_profile_standards = enhanced_security_compliance.value.compliance_security_profile_standards
-      enhanced_security_monitoring_enabled  = enhanced_security_compliance.value.enhanced_security_monitoring_enabled
-    }
-  }
+  create_headers = var.enable_telemetry ? { "User-Agent" : local.avm_azapi_header } : null
+  delete_headers = var.enable_telemetry ? { "User-Agent" : local.avm_azapi_header } : null
+  read_headers   = var.enable_telemetry ? { "User-Agent" : local.avm_azapi_header } : null
+  response_export_values = [
+    "properties.workspaceId",
+    "properties.workspaceUrl",
+    "properties.managedResourceGroupId",
+    "properties.diskEncryptionSetId",
+    "properties.managedDiskIdentity",
+    "properties.storageAccountIdentity",
+  ]
+  schema_validation_enabled = false
+  tags                      = var.tags
+  update_headers            = var.enable_telemetry ? { "User-Agent" : local.avm_azapi_header } : null
 }
 
 resource "azurerm_management_lock" "this" {
@@ -57,7 +36,7 @@ resource "azurerm_management_lock" "this" {
 
   lock_level = var.lock.kind
   name       = coalesce(var.lock.name, "lock-${var.lock.kind}")
-  scope      = azurerm_databricks_workspace.this.id
+  scope      = azapi_resource.this.id
   notes      = var.lock.kind == "CanNotDelete" ? "Cannot delete the resource or its child resources." : "Cannot delete or modify the resource or its child resources."
 }
 
@@ -65,7 +44,7 @@ resource "azurerm_role_assignment" "this" {
   for_each = var.role_assignments
 
   principal_id                           = each.value.principal_id
-  scope                                  = azurerm_databricks_workspace.this.id
+  scope                                  = azapi_resource.this.id
   condition                              = each.value.condition
   condition_version                      = each.value.condition_version
   delegated_managed_identity_resource_id = each.value.delegated_managed_identity_resource_id
@@ -78,7 +57,7 @@ resource "azurerm_monitor_diagnostic_setting" "this" {
   for_each = var.diagnostic_settings
 
   name                           = each.value.name != null ? each.value.name : "diag-${var.name}"
-  target_resource_id             = azurerm_databricks_workspace.this.id
+  target_resource_id             = azapi_resource.this.id
   eventhub_authorization_rule_id = each.value.event_hub_authorization_rule_resource_id
   eventhub_name                  = each.value.event_hub_name
   log_analytics_workspace_id     = each.value.workspace_resource_id
@@ -105,7 +84,7 @@ resource "azurerm_databricks_workspace_root_dbfs_customer_managed_key" "this" {
   count = var.customer_managed_key_enabled ? 1 : 0
 
   key_vault_key_id = var.dbfs_root_cmk_key_vault_key_id
-  workspace_id     = azurerm_databricks_workspace.this.id
+  workspace_id     = azapi_resource.this.id
 }
 
 
@@ -116,7 +95,7 @@ resource "azurerm_databricks_virtual_network_peering" "this" {
   remote_address_space_prefixes = each.value.remote_address_space_prefixes
   remote_virtual_network_id     = each.value.remote_virtual_network_id
   resource_group_name           = each.value.resource_group_name != null ? each.value.resource_group_name : var.resource_group_name
-  workspace_id                  = azurerm_databricks_workspace.this.id
+  workspace_id                  = azapi_resource.this.id
   allow_forwarded_traffic       = each.value.allow_forwarded_traffic != null ? each.value.allow_forwarded_traffic : false
   allow_gateway_transit         = each.value.allow_gateway_transit != null ? each.value.allow_gateway_transit : false
   allow_virtual_network_access  = each.value.allow_virtual_network_access != null ? each.value.allow_virtual_network_access : true

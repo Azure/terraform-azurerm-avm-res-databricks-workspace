@@ -10,7 +10,7 @@ output "databricks_access_connector_principal_ids" {
 
 output "databricks_id" {
   description = "The ID of the Databricks Workspace in the Azure management plane."
-  value       = azurerm_databricks_workspace.this.id
+  value       = azapi_resource.this.id
 }
 
 output "databricks_virtual_network_peering_address_space_prefixes" {
@@ -29,13 +29,13 @@ output "databricks_virtual_network_peering_virtual_network_id" {
 }
 
 output "databricks_workspace_disk_encryption_set_id" {
-  description = "The ID of Managed Disk Encryption Set created by the Databricks Workspace."
-  value       = azurerm_databricks_workspace.this.disk_encryption_set_id
+  description = "The ID of Managed Disk Encryption Set created by the Databricks Workspace. Only populated on Hybrid compute mode workspaces with customer-managed disk encryption."
+  value       = try(azapi_resource.this.output.properties.diskEncryptionSetId, null)
 }
 
 output "databricks_workspace_id" {
   description = "The unique identifier of the databricks workspace in Databricks control plane."
-  value       = azurerm_databricks_workspace.this.workspace_id
+  value       = azapi_resource.this.output.properties.workspaceId
 }
 
 output "databricks_workspace_managed_disk_identity" {
@@ -46,16 +46,16 @@ output "databricks_workspace_managed_disk_identity" {
   - `tenant_id` - The UUID of the tenant where the internal databricks disks identity was created.
   - `type` - The type of the internal databricks disks identity.
   DESCRIPTION
-  value = length(azurerm_databricks_workspace.this.managed_disk_identity) > 0 ? {
-    principal_id = azurerm_databricks_workspace.this.managed_disk_identity[0].principal_id
-    tenant_id    = azurerm_databricks_workspace.this.managed_disk_identity[0].tenant_id
-    type         = azurerm_databricks_workspace.this.managed_disk_identity[0].type
-  } : null
+  value = try({
+    principal_id = azapi_resource.this.output.properties.managedDiskIdentity.principalId
+    tenant_id    = azapi_resource.this.output.properties.managedDiskIdentity.tenantId
+    type         = azapi_resource.this.output.properties.managedDiskIdentity.type
+  }, null)
 }
 
 output "databricks_workspace_managed_resource_group_id" {
   description = "The ID of the Managed Resource Group created by the Databricks Workspace."
-  value       = azurerm_databricks_workspace.this.managed_resource_group_id
+  value       = azapi_resource.this.output.properties.managedResourceGroupId
 }
 
 output "databricks_workspace_storage_account_identity" {
@@ -66,21 +66,21 @@ output "databricks_workspace_storage_account_identity" {
   - `tenant_id` - The UUID of the tenant where the internal databricks storage account was created.
   - `type` - The type of the internal databricks storage account.
   DESCRIPTION
-  value = length(azurerm_databricks_workspace.this.storage_account_identity) > 0 ? {
-    principal_id = azurerm_databricks_workspace.this.storage_account_identity[0].principal_id
-    tenant_id    = azurerm_databricks_workspace.this.storage_account_identity[0].tenant_id
-    type         = azurerm_databricks_workspace.this.storage_account_identity[0].type
-  } : null
+  value = try({
+    principal_id = azapi_resource.this.output.properties.storageAccountIdentity.principalId
+    tenant_id    = azapi_resource.this.output.properties.storageAccountIdentity.tenantId
+    type         = azapi_resource.this.output.properties.storageAccountIdentity.type
+  }, null)
 }
 
 output "databricks_workspace_url" {
   description = "The workspace URL which is of the format 'adb-{workspaceId}.{random}.azuredatabricks.net'."
-  value       = azurerm_databricks_workspace.this.workspace_url
+  value       = azapi_resource.this.output.properties.workspaceUrl
 }
 
 output "name" {
   description = "The name of the Databricks Workspace."
-  value       = azurerm_databricks_workspace.this.name
+  value       = azapi_resource.this.name
 }
 
 output "private_endpoints" {
@@ -90,10 +90,10 @@ output "private_endpoints" {
 
 output "resource" {
   description = "This is the full output for the resource."
-  value       = azurerm_databricks_workspace.this
+  value       = azapi_resource.this
 }
 
 output "resource_id" {
   description = "The ID of the Databricks Workspace in the Azure management plane."
-  value       = azurerm_databricks_workspace.this.id
+  value       = azapi_resource.this.id
 }
