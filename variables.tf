@@ -337,7 +337,6 @@ variable "lock" {
   }
 }
 
-# tflint-ignore: terraform_unused_declarations - retained for backward compatibility; the azapi workspace body derives the Key Vault URI from managed_disk_cmk_key_vault_key_id directly.
 variable "managed_disk_cmk_key_vault_id" {
   type        = string
   default     = null
@@ -382,7 +381,6 @@ variable "managed_resource_group_name" {
   DESCRIPTION
 }
 
-# tflint-ignore: terraform_unused_declarations - retained for backward compatibility; the azapi workspace body derives the Key Vault URI from managed_services_cmk_key_vault_key_id directly.
 variable "managed_services_cmk_key_vault_id" {
   type        = string
   default     = null

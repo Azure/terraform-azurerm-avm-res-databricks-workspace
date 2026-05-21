@@ -29,6 +29,17 @@ resource "azapi_resource" "this" {
   schema_validation_enabled = false
   tags                      = var.tags
   update_headers            = var.enable_telemetry ? { "User-Agent" : local.avm_azapi_header } : null
+
+  lifecycle {
+    precondition {
+      condition     = var.managed_disk_cmk_key_vault_id == null || var.managed_disk_cmk_key_vault_key_id != null
+      error_message = "managed_disk_cmk_key_vault_id is set but managed_disk_cmk_key_vault_key_id is not; provide the Key Vault key URI as well."
+    }
+    precondition {
+      condition     = var.managed_services_cmk_key_vault_id == null || var.managed_services_cmk_key_vault_key_id != null
+      error_message = "managed_services_cmk_key_vault_id is set but managed_services_cmk_key_vault_key_id is not; provide the Key Vault key URI as well."
+    }
+  }
 }
 
 resource "azurerm_management_lock" "this" {
