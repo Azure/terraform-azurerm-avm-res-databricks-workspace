@@ -1,14 +1,6 @@
 locals {
   resource_group_location            = try(data.azurerm_resource_group.parent.location, null)
   role_definition_resource_substring = "/providers/Microsoft.Authorization/roleDefinitions"
-  # Variables retained for backward compatibility. The azapi workspace body derives the Key Vault
-  # URI directly from the *_cmk_key_vault_key_id (which is itself a full Key Vault key URI), so
-  # the separate Key Vault resource ID inputs are no longer required. Touched here so tflint does
-  # not flag them as unused while the public input surface stays stable.
-  deprecated_unused_inputs = [
-    var.managed_disk_cmk_key_vault_id,
-    var.managed_services_cmk_key_vault_id,
-  ]
 }
 
 locals {
