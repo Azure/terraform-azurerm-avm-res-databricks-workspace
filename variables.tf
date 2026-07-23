@@ -537,6 +537,24 @@ variable "tags" {
   description = "(Optional) Tags of the resource."
 }
 
+variable "timeouts" {
+  type = object({
+    create = optional(string, "30m")
+    delete = optional(string, "60m")
+    read   = optional(string, "5m")
+    update = optional(string, "30m")
+  })
+  default     = {}
+  description = <<DESCRIPTION
+(Optional) The timeouts for the Databricks Workspace resource operations.
+
+- `create` - (Defaults to 30 minutes) Used when creating the Databricks Workspace.
+- `delete` - (Defaults to 60 minutes) Used when deleting the Databricks Workspace. A longer default is used because workspaces that enable VNet injection and/or the default storage firewall can take significantly longer than the provider default to delete.
+- `read` - (Defaults to 5 minutes) Used when retrieving the Databricks Workspace.
+- `update` - (Defaults to 30 minutes) Used when updating the Databricks Workspace.
+DESCRIPTION
+}
+
 variable "virtual_network_peering" {
   type = map(object({
     name                          = optional(string, null)

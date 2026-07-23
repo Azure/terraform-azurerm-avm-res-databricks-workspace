@@ -548,6 +548,28 @@ Type: `map(string)`
 
 Default: `null`
 
+### <a name="input_timeouts"></a> [timeouts](#input\_timeouts)
+
+Description: (Optional) The timeouts for the Databricks Workspace resource operations.
+
+- `create` - (Defaults to 30 minutes) Used when creating the Databricks Workspace.
+- `delete` - (Defaults to 60 minutes) Used when deleting the Databricks Workspace. A longer default is used because workspaces that enable VNet injection and/or the default storage firewall can take significantly longer than the provider default to delete.
+- `read` - (Defaults to 5 minutes) Used when retrieving the Databricks Workspace.
+- `update` - (Defaults to 30 minutes) Used when updating the Databricks Workspace.
+
+Type:
+
+```hcl
+object({
+    create = optional(string, "30m")
+    delete = optional(string, "60m")
+    read   = optional(string, "5m")
+    update = optional(string, "30m")
+  })
+```
+
+Default: `{}`
+
 ### <a name="input_virtual_network_peering"></a> [virtual\_network\_peering](#input\_virtual\_network\_peering)
 
 Description: A map of virtual network peering configurations. The map key is deliberately arbitrary to avoid issues where map keys may be unknown at plan time.
