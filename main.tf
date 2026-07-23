@@ -87,7 +87,6 @@ resource "azurerm_databricks_workspace_root_dbfs_customer_managed_key" "this" {
   workspace_id     = azapi_resource.this.id
 }
 
-
 resource "azurerm_databricks_virtual_network_peering" "this" {
   for_each = var.virtual_network_peering
 
