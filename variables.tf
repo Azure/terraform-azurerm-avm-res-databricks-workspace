@@ -72,7 +72,7 @@ variable "access_connector_id" {
   DESCRIPTION
 
   validation {
-    condition     = var.default_storage_firewall_enabled == false || var.access_connector_id != null || var.access_connector_key != null
+    condition     = var.default_storage_firewall_enabled == false || (var.access_connector_id != null || var.access_connector_key != null)
     error_message = "Either access_connector_id or access_connector_key is required when default_storage_firewall_enabled is set to true."
   }
   validation {
