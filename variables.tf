@@ -66,13 +66,33 @@ variable "access_connector_id" {
   type        = string
   default     = null
   description = <<DESCRIPTION
-  The ID of the Databricks Access Connector to provide access to the workspace.
-  The access_connector_id field is required when default_storage_firewall_enabled is set to true.
+  The ID of an existing Databricks Access Connector to provide access to the workspace.
+  Either this or `access_connector_key` is required when `default_storage_firewall_enabled` is set to true.
+  Use this when the Access Connector is created outside of this module. To use an Access Connector created by this module (via the `access_connector` variable), set `access_connector_key` instead.
   DESCRIPTION
 
   validation {
-    condition     = var.default_storage_firewall_enabled == false || var.access_connector_id != null
-    error_message = "The access_connector_id is required when default_storage_firewall_enabled is set to true."
+    condition     = var.default_storage_firewall_enabled == false || var.access_connector_id != null || var.access_connector_key != null
+    error_message = "Either access_connector_id or access_connector_key is required when default_storage_firewall_enabled is set to true."
+  }
+  validation {
+    condition     = var.access_connector_id == null || var.access_connector_key == null
+    error_message = "Only one of access_connector_id or access_connector_key can be set."
+  }
+}
+
+variable "access_connector_key" {
+  type        = string
+  default     = null
+  description = <<DESCRIPTION
+  The key of an Access Connector defined in the `access_connector` variable (i.e. one created by this module) to associate with the workspace.
+  Use this instead of `access_connector_id` to reference an Access Connector that this module creates, which is otherwise impossible because its ID is only known after apply.
+  The referenced Access Connector must exist as a key in the `access_connector` map.
+  DESCRIPTION
+
+  validation {
+    condition     = var.access_connector_key == null || contains(keys(var.access_connector), var.access_connector_key)
+    error_message = "The access_connector_key must match a key defined in the access_connector variable."
   }
 }
 

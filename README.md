@@ -132,8 +132,19 @@ Default: `{}`
 
 ### <a name="input_access_connector_id"></a> [access\_connector\_id](#input\_access\_connector\_id)
 
-Description:   The ID of the Databricks Access Connector to provide access to the workspace.  
-  The access\_connector\_id field is required when default\_storage\_firewall\_enabled is set to true.
+Description:   The ID of an existing Databricks Access Connector to provide access to the workspace.  
+  Either this or `access_connector_key` is required when `default_storage_firewall_enabled` is set to true.  
+  Use this when the Access Connector is created outside of this module. To use an Access Connector created by this module (via the `access_connector` variable), set `access_connector_key` instead.
+
+Type: `string`
+
+Default: `null`
+
+### <a name="input_access_connector_key"></a> [access\_connector\_key](#input\_access\_connector\_key)
+
+Description:   The key of an Access Connector defined in the `access_connector` variable (i.e. one created by this module) to associate with the workspace.  
+  Use this instead of `access_connector_id` to reference an Access Connector that this module creates, which is otherwise impossible because its ID is only known after apply.  
+  The referenced Access Connector must exist as a key in the `access_connector` map.
 
 Type: `string`
 
