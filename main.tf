@@ -26,6 +26,7 @@ resource "azapi_resource" "this" {
     "properties.managedDiskIdentity",
     "properties.storageAccountIdentity",
   ]
+  retry                     = var.retry
   schema_validation_enabled = false
   tags                      = var.tags
   update_headers            = var.enable_telemetry ? { "User-Agent" : local.avm_azapi_header } : null

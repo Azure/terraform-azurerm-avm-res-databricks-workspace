@@ -508,6 +508,26 @@ Type: `bool`
 
 Default: `true`
 
+### <a name="input_retry"></a> [retry](#input\_retry)
+
+Description: The retry configuration applied to the underlying `azapi_resource` for the Databricks Workspace.
+
+- `error_message_regex` - (Optional) A list of regular expressions to match against error messages. If any of the regular expressions match, the request will be retried. When `null`, no retry is performed.
+- `interval_seconds` - (Optional) The base number of seconds to wait between retries. Defaults to the AzAPI provider default (`10`).
+- `max_interval_seconds` - (Optional) The maximum number of seconds to wait between retries. Defaults to the AzAPI provider default (`180`).
+
+Type:
+
+```hcl
+object({
+    error_message_regex  = optional(list(string), null)
+    interval_seconds     = optional(number, null)
+    max_interval_seconds = optional(number, null)
+  })
+```
+
+Default: `{}`
+
 ### <a name="input_role_assignments"></a> [role\_assignments](#input\_role\_assignments)
 
 Description:   A map of role assignments to create on the <RESOURCE>. The map key is deliberately arbitrary to avoid issues where map keys maybe unknown at plan time.
@@ -550,21 +570,23 @@ Default: `null`
 
 ### <a name="input_timeouts"></a> [timeouts](#input\_timeouts)
 
-Description: (Optional) The timeouts for the Databricks Workspace resource operations.
+Description: The timeouts applied to the underlying `azapi_resource` for the Databricks Workspace.
 
-- `create` - (Defaults to 30 minutes) Used when creating the Databricks Workspace.
-- `delete` - (Defaults to 60 minutes) Used when deleting the Databricks Workspace. A longer default is used because workspaces that enable VNet injection and/or the default storage firewall can take significantly longer than the provider default to delete.
-- `read` - (Defaults to 5 minutes) Used when retrieving the Databricks Workspace.
-- `update` - (Defaults to 30 minutes) Used when updating the Databricks Workspace.
+Each value must be a string parsable as a Go duration (for example `"30s"`, `"5m"`, `"1h30m"`). When `null`, the AzAPI provider default is used.
+
+- `create` - (Optional) Timeout for create operations.
+- `delete` - (Optional) Timeout for delete operations. Note that workspaces that enable VNet injection and/or the default storage firewall can take significantly longer than the provider default to delete, so a longer value may be required.
+- `read` - (Optional) Timeout for read operations.
+- `update` - (Optional) Timeout for update operations.
 
 Type:
 
 ```hcl
 object({
-    create = optional(string, "30m")
-    delete = optional(string, "60m")
-    read   = optional(string, "5m")
-    update = optional(string, "30m")
+    create = optional(string, null)
+    delete = optional(string, null)
+    read   = optional(string, null)
+    update = optional(string, null)
   })
 ```
 
