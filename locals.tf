@@ -142,8 +142,15 @@ locals {
 }
 
 locals {
-  workspace_access_connector = var.access_connector_id != null ? {
-    id           = var.access_connector_id
+  # Resolve the Access Connector ID used in the workspace body. Prefer an
+  # explicitly-supplied access_connector_id. Otherwise, if access_connector_key
+  # references an Access Connector created by this module, use its ID. This
+  # solves the chicken-and-egg problem where the connector is created within the
+  # module (issue #148) and therefore cannot be passed back in as an input.
+  managed_access_connector_id  = var.access_connector_key != null ? azurerm_databricks_access_connector.this[var.access_connector_key].id : null
+  resolved_access_connector_id = var.access_connector_id != null ? var.access_connector_id : local.managed_access_connector_id
+  workspace_access_connector = local.resolved_access_connector_id != null ? {
+    id           = local.resolved_access_connector_id
     identityType = "SystemAssigned"
   } : null
   workspace_default_catalog = var.default_catalog != null ? merge(
@@ -163,7 +170,7 @@ locals {
     accessConnector            = local.is_serverless ? null : local.workspace_access_connector
     computeMode                = local.is_serverless ? "Serverless" : "Hybrid"
     defaultCatalog             = local.is_serverless ? null : local.workspace_default_catalog
-    defaultStorageFirewall     = local.is_serverless ? null : (var.access_connector_id != null || var.default_storage_firewall_enabled ? (var.default_storage_firewall_enabled ? "Enabled" : "Disabled") : null)
+    defaultStorageFirewall     = local.is_serverless ? null : (local.resolved_access_connector_id != null || var.default_storage_firewall_enabled ? (var.default_storage_firewall_enabled ? "Enabled" : "Disabled") : null)
     encryption                 = local.workspace_encryption
     enhancedSecurityCompliance = local.workspace_enhanced_security_compliance
     managedResourceGroupId     = local.is_serverless ? null : local.managed_resource_group_id

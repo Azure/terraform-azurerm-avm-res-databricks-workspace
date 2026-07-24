@@ -26,9 +26,17 @@ resource "azapi_resource" "this" {
     "properties.managedDiskIdentity",
     "properties.storageAccountIdentity",
   ]
+  retry                     = var.retry
   schema_validation_enabled = false
   tags                      = var.tags
   update_headers            = var.enable_telemetry ? { "User-Agent" : local.avm_azapi_header } : null
+
+  timeouts {
+    create = var.timeouts.create
+    delete = var.timeouts.delete
+    read   = var.timeouts.read
+    update = var.timeouts.update
+  }
 }
 
 resource "azurerm_management_lock" "this" {
@@ -86,7 +94,6 @@ resource "azurerm_databricks_workspace_root_dbfs_customer_managed_key" "this" {
   key_vault_key_id = var.dbfs_root_cmk_key_vault_key_id
   workspace_id     = azapi_resource.this.id
 }
-
 
 resource "azurerm_databricks_virtual_network_peering" "this" {
   for_each = var.virtual_network_peering

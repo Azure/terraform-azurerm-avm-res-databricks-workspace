@@ -132,8 +132,19 @@ Default: `{}`
 
 ### <a name="input_access_connector_id"></a> [access\_connector\_id](#input\_access\_connector\_id)
 
-Description:   The ID of the Databricks Access Connector to provide access to the workspace.  
-  The access\_connector\_id field is required when default\_storage\_firewall\_enabled is set to true.
+Description:   The ID of an existing Databricks Access Connector to provide access to the workspace.  
+  Either this or `access_connector_key` is required when `default_storage_firewall_enabled` is set to true.  
+  Use this when the Access Connector is created outside of this module. To use an Access Connector created by this module (via the `access_connector` variable), set `access_connector_key` instead.
+
+Type: `string`
+
+Default: `null`
+
+### <a name="input_access_connector_key"></a> [access\_connector\_key](#input\_access\_connector\_key)
+
+Description:   The key of an Access Connector defined in the `access_connector` variable (i.e. one created by this module) to associate with the workspace.  
+  Use this instead of `access_connector_id` to reference an Access Connector that this module creates, which is otherwise impossible because its ID is only known after apply.  
+  The referenced Access Connector must exist as a key in the `access_connector` map.
 
 Type: `string`
 
@@ -497,6 +508,26 @@ Type: `bool`
 
 Default: `true`
 
+### <a name="input_retry"></a> [retry](#input\_retry)
+
+Description: The retry configuration applied to the underlying `azapi_resource` for the Databricks Workspace.
+
+- `error_message_regex` - (Optional) A list of regular expressions to match against error messages. If any of the regular expressions match, the request will be retried. When `null`, no retry is performed.
+- `interval_seconds` - (Optional) The base number of seconds to wait between retries. Defaults to the AzAPI provider default (`10`).
+- `max_interval_seconds` - (Optional) The maximum number of seconds to wait between retries. Defaults to the AzAPI provider default (`180`).
+
+Type:
+
+```hcl
+object({
+    error_message_regex  = optional(list(string), null)
+    interval_seconds     = optional(number, null)
+    max_interval_seconds = optional(number, null)
+  })
+```
+
+Default: `{}`
+
 ### <a name="input_role_assignments"></a> [role\_assignments](#input\_role\_assignments)
 
 Description:   A map of role assignments to create on the <RESOURCE>. The map key is deliberately arbitrary to avoid issues where map keys maybe unknown at plan time.
@@ -536,6 +567,30 @@ Description: (Optional) Tags of the resource.
 Type: `map(string)`
 
 Default: `null`
+
+### <a name="input_timeouts"></a> [timeouts](#input\_timeouts)
+
+Description: The timeouts applied to the underlying `azapi_resource` for the Databricks Workspace.
+
+Each value must be a string parsable as a Go duration (for example `"30s"`, `"5m"`, `"1h30m"`). When `null`, the AzAPI provider default is used.
+
+- `create` - (Optional) Timeout for create operations.
+- `delete` - (Optional) Timeout for delete operations. Note that workspaces that enable VNet injection and/or the default storage firewall can take significantly longer than the provider default to delete, so a longer value may be required.
+- `read` - (Optional) Timeout for read operations.
+- `update` - (Optional) Timeout for update operations.
+
+Type:
+
+```hcl
+object({
+    create = optional(string, null)
+    delete = optional(string, null)
+    read   = optional(string, null)
+    update = optional(string, null)
+  })
+```
+
+Default: `{}`
 
 ### <a name="input_virtual_network_peering"></a> [virtual\_network\_peering](#input\_virtual\_network\_peering)
 
