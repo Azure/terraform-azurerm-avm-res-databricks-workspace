@@ -66,13 +66,33 @@ variable "access_connector_id" {
   type        = string
   default     = null
   description = <<DESCRIPTION
-  The ID of the Databricks Access Connector to provide access to the workspace.
-  The access_connector_id field is required when default_storage_firewall_enabled is set to true.
+  The ID of an existing Databricks Access Connector to provide access to the workspace.
+  Either this or `access_connector_key` is required when `default_storage_firewall_enabled` is set to true.
+  Use this when the Access Connector is created outside of this module. To use an Access Connector created by this module (via the `access_connector` variable), set `access_connector_key` instead.
   DESCRIPTION
 
   validation {
-    condition     = var.default_storage_firewall_enabled == false || var.access_connector_id != null
-    error_message = "The access_connector_id is required when default_storage_firewall_enabled is set to true."
+    condition     = var.default_storage_firewall_enabled == false || (var.access_connector_id != null || var.access_connector_key != null)
+    error_message = "Either access_connector_id or access_connector_key is required when default_storage_firewall_enabled is set to true."
+  }
+  validation {
+    condition     = var.access_connector_id == null || var.access_connector_key == null
+    error_message = "Only one of access_connector_id or access_connector_key can be set."
+  }
+}
+
+variable "access_connector_key" {
+  type        = string
+  default     = null
+  description = <<DESCRIPTION
+  The key of an Access Connector defined in the `access_connector` variable (i.e. one created by this module) to associate with the workspace.
+  Use this instead of `access_connector_id` to reference an Access Connector that this module creates, which is otherwise impossible because its ID is only known after apply.
+  The referenced Access Connector must exist as a key in the `access_connector` map.
+  DESCRIPTION
+
+  validation {
+    condition     = var.access_connector_key == null || contains(keys(var.access_connector), var.access_connector_key)
+    error_message = "The access_connector_key must match a key defined in the access_connector variable."
   }
 }
 
@@ -481,6 +501,24 @@ variable "public_network_access_enabled" {
   DESCRIPTION
 }
 
+# tflint-ignore: terraform_unused_declarations
+variable "retry" {
+  type = object({
+    error_message_regex  = optional(list(string), null)
+    interval_seconds     = optional(number, null)
+    max_interval_seconds = optional(number, null)
+  })
+  default     = {}
+  description = <<DESCRIPTION
+The retry configuration applied to the underlying `azapi_resource` for the Databricks Workspace.
+
+- `error_message_regex` - (Optional) A list of regular expressions to match against error messages. If any of the regular expressions match, the request will be retried. When `null`, no retry is performed.
+- `interval_seconds` - (Optional) The base number of seconds to wait between retries. Defaults to the AzAPI provider default (`10`).
+- `max_interval_seconds` - (Optional) The maximum number of seconds to wait between retries. Defaults to the AzAPI provider default (`180`).
+DESCRIPTION
+  nullable    = false
+}
+
 variable "role_assignments" {
   type = map(object({
     role_definition_id_or_name             = string
@@ -510,11 +548,31 @@ variable "role_assignments" {
   nullable    = false
 }
 
-# tflint-ignore: terraform_unused_declarations
 variable "tags" {
   type        = map(string)
   default     = null
   description = "(Optional) Tags of the resource."
+}
+
+variable "timeouts" {
+  type = object({
+    create = optional(string, null)
+    delete = optional(string, null)
+    read   = optional(string, null)
+    update = optional(string, null)
+  })
+  default     = {}
+  description = <<DESCRIPTION
+The timeouts applied to the underlying `azapi_resource` for the Databricks Workspace.
+
+Each value must be a string parsable as a Go duration (for example `"30s"`, `"5m"`, `"1h30m"`). When `null`, the AzAPI provider default is used.
+
+- `create` - (Optional) Timeout for create operations.
+- `delete` - (Optional) Timeout for delete operations. Note that workspaces that enable VNet injection and/or the default storage firewall can take significantly longer than the provider default to delete, so a longer value may be required.
+- `read` - (Optional) Timeout for read operations.
+- `update` - (Optional) Timeout for update operations.
+DESCRIPTION
+  nullable    = false
 }
 
 variable "virtual_network_peering" {
