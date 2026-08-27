@@ -192,6 +192,11 @@ module "databricks" {
     # }
   }
   public_network_access_enabled = true
+  # VNet-injected workspaces with the default storage firewall enabled can take
+  # longer than the AzAPI provider default to delete, so extend the delete timeout.
+  timeouts = {
+    delete = "60m"
+  }
 }
 ```
 
