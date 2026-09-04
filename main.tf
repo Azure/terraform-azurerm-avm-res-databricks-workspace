@@ -15,9 +15,6 @@ resource "azapi_resource" "this" {
     }
     properties = local.workspace_properties
   }
-  create_headers = var.enable_telemetry ? { "User-Agent" : local.avm_azapi_header } : null
-  delete_headers = var.enable_telemetry ? { "User-Agent" : local.avm_azapi_header } : null
-  read_headers   = var.enable_telemetry ? { "User-Agent" : local.avm_azapi_header } : null
   response_export_values = [
     "properties.workspaceId",
     "properties.workspaceUrl",
@@ -28,7 +25,6 @@ resource "azapi_resource" "this" {
   ]
   schema_validation_enabled = false
   tags                      = var.tags
-  update_headers            = var.enable_telemetry ? { "User-Agent" : local.avm_azapi_header } : null
 }
 
 resource "azurerm_management_lock" "this" {

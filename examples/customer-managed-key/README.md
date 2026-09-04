@@ -28,7 +28,6 @@ terraform {
   }
 }
 
-
 provider "azurerm" {
   features {}
 }
@@ -105,7 +104,6 @@ resource "azurerm_key_vault_key" "cmkms" {
   depends_on = [azurerm_role_assignment.current_user]
 }
 
-
 resource "azurerm_key_vault_key" "managed_disk_cmk" {
   key_opts = [
     "decrypt",
@@ -162,8 +160,10 @@ resource "azurerm_key_vault_key" "dbfs_root" {
 
   depends_on = [azurerm_role_assignment.current_user, azurerm_role_assignment.storage_account, azurerm_role_assignment.azuredatabricks]
 }
+
 # Get the application IDs for APIs published by Microsoft
 data "azuread_application_published_app_ids" "well_known" {}
+
 # Get the object id of the Azure DataBricks service principal
 data "azuread_service_principal" "this" {
   client_id = data.azuread_application_published_app_ids.well_known.result["AzureDataBricks"]
@@ -175,7 +175,6 @@ resource "azurerm_role_assignment" "azuredatabricks" {
   scope                = azurerm_key_vault.this.id
   role_definition_name = "Key Vault Crypto User"
 }
-
 
 # Add the current user to the key vault access policy
 resource "azurerm_role_assignment" "current_user" {
