@@ -27,7 +27,6 @@ terraform {
   }
 }
 
-
 provider "azurerm" {
   features {}
 }
@@ -69,12 +68,13 @@ resource "azurerm_virtual_network" "this" {
   resource_group_name = azurerm_resource_group.this.name
   address_space       = ["10.0.0.0/16"]
 }
+
 # A host (public) subnet is required for vnet injection.
 resource "azurerm_subnet" "public" {
-  address_prefixes     = ["10.0.1.0/24"]
   name                 = "${module.naming.subnet.name_unique}-public"
   resource_group_name  = azurerm_resource_group.this.name
   virtual_network_name = azurerm_virtual_network.this.name
+  address_prefixes     = ["10.0.1.0/24"]
 
   delegation {
     name = "databricks-del-public"
@@ -92,10 +92,10 @@ resource "azurerm_subnet" "public" {
 
 # A container (private) subnet is required for vnet injection.
 resource "azurerm_subnet" "private" {
-  address_prefixes     = ["10.0.2.0/24"]
   name                 = "${module.naming.subnet.name_unique}-private"
   resource_group_name  = azurerm_resource_group.this.name
   virtual_network_name = azurerm_virtual_network.this.name
+  address_prefixes     = ["10.0.2.0/24"]
 
   delegation {
     name = "databricks-del-private"
@@ -113,10 +113,10 @@ resource "azurerm_subnet" "private" {
 
 # A private endpoint vnet
 resource "azurerm_subnet" "privateendpoint" {
-  address_prefixes     = ["10.0.3.0/24"]
   name                 = "${module.naming.subnet.name_unique}-private-endpoint"
   resource_group_name  = azurerm_resource_group.this.name
   virtual_network_name = azurerm_virtual_network.this.name
+  address_prefixes     = ["10.0.3.0/24"]
 }
 
 # A network security group association is required for vnet injection.
