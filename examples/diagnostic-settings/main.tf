@@ -69,5 +69,5 @@ module "databricks" {
       workspace_resource_id = azurerm_log_analytics_workspace.this.id
     }
   }
-  enable_telemetry = var.enable_telemetry
+  enable_telemetry = false
 }
