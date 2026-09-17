@@ -192,6 +192,7 @@ module "databricks" {
   sku                                                 = "premium"
   customer_managed_key_enabled                        = true
   dbfs_root_cmk_key_vault_key_id                      = azurerm_key_vault_key.dbfs_root.id
+  enable_telemetry                                    = false
   managed_disk_cmk_key_vault_key_id                   = azurerm_key_vault_key.managed_disk_cmk.id
   managed_disk_cmk_rotation_to_latest_version_enabled = true
   managed_services_cmk_key_vault_key_id               = azurerm_key_vault_key.cmkms.id

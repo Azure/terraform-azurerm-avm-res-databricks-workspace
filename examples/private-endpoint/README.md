@@ -172,6 +172,7 @@ module "databricks" {
     virtual_network_id                                   = azurerm_virtual_network.this.id
   }
   default_storage_firewall_enabled      = true
+  enable_telemetry                      = false
   network_security_group_rules_required = "NoAzureDatabricksRules" # "AllRules", Required when public_network_access_enabled is set to false.
   private_endpoints = {
     databricks_ui_api = {

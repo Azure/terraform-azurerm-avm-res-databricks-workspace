@@ -53,5 +53,5 @@ module "databricks" {
   name                = module.naming.databricks_workspace.name_unique
   resource_group_name = azurerm_resource_group.this.name
   sku                 = "premium"
-  enable_telemetry    = var.enable_telemetry
+  enable_telemetry    = false
 }
