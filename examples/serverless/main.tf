@@ -55,5 +55,5 @@ module "databricks" {
   resource_group_name = azurerm_resource_group.this.name
   sku                 = "premium"
   compute_mode        = "Serverless"
-  enable_telemetry    = false
+  enable_telemetry    = var.enable_telemetry
 }
