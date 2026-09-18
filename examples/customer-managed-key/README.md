@@ -192,7 +192,7 @@ module "databricks" {
   sku                                                 = "premium"
   customer_managed_key_enabled                        = true
   dbfs_root_cmk_key_vault_key_id                      = azurerm_key_vault_key.dbfs_root.id
-  enable_telemetry                                    = false
+  enable_telemetry                                    = var.enable_telemetry
   managed_disk_cmk_key_vault_key_id                   = azurerm_key_vault_key.managed_disk_cmk.id
   managed_disk_cmk_rotation_to_latest_version_enabled = true
   managed_services_cmk_key_vault_key_id               = azurerm_key_vault_key.cmkms.id
@@ -251,7 +251,17 @@ No required inputs.
 
 ## Optional Inputs
 
-No optional inputs.
+The following input variables are optional (have default values):
+
+### <a name="input_enable_telemetry"></a> [enable\_telemetry](#input\_enable\_telemetry)
+
+Description: This variable controls whether or not telemetry is enabled for the module.  
+For more information see <https://aka.ms/avm/telemetryinfo>.  
+If it is set to false, then no telemetry will be collected.
+
+Type: `bool`
+
+Default: `false`
 
 ## Outputs
 

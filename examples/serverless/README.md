@@ -64,7 +64,7 @@ module "databricks" {
   resource_group_name = azurerm_resource_group.this.name
   sku                 = "premium"
   compute_mode        = "Serverless"
-  enable_telemetry    = false
+  enable_telemetry    = var.enable_telemetry
 }
 ```
 
@@ -103,7 +103,7 @@ If it is set to false, then no telemetry will be collected.
 
 Type: `bool`
 
-Default: `true`
+Default: `false`
 
 ## Outputs
 
