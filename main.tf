@@ -8,13 +8,14 @@ resource "azapi_resource" "this" {
   location  = coalesce(var.location, local.resource_group_location)
   name      = var.name
   parent_id = data.azurerm_resource_group.parent.id
-  type      = "Microsoft.Databricks/workspaces@2026-01-01"
+  type      = var.resource_types.databricks_workspaces
   body = {
     sku = {
       name = var.sku
     }
     properties = local.workspace_properties
   }
+  ignore_body_changes = length(var.ignore_body_changes.databricks_workspaces) > 0 ? var.ignore_body_changes.databricks_workspaces : null
   response_export_values = [
     "properties.workspaceId",
     "properties.workspaceUrl",
@@ -23,8 +24,20 @@ resource "azapi_resource" "this" {
     "properties.managedDiskIdentity",
     "properties.storageAccountIdentity",
   ]
+  retry                     = var.retry
   schema_validation_enabled = false
   tags                      = var.tags
+
+  dynamic "timeouts" {
+    for_each = var.timeouts == null ? [] : [var.timeouts]
+
+    content {
+      create = timeouts.value.create
+      read   = timeouts.value.read
+      update = timeouts.value.update
+      delete = timeouts.value.delete
+    }
+  }
 }
 
 resource "azurerm_management_lock" "this" {

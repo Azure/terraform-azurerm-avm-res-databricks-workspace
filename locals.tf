@@ -4,6 +4,7 @@ locals {
 }
 
 locals {
+  private_endpoints = merge(azurerm_private_endpoint.this, azurerm_private_endpoint.this_unmanaged_dns_zone_groups)
   private_endpoint_application_security_group_associations = { for assoc in flatten([
     for pe_k, pe_v in var.private_endpoints : [
       for asg_k, asg_v in pe_v.application_security_group_associations : {
@@ -13,6 +14,16 @@ locals {
       }
     ]
   ]) : "${assoc.pe_key}-${assoc.asg_key}" => assoc }
+  private_endpoint_role_assignments = {
+    for assignment in flatten([
+      for endpoint_key, endpoint in var.private_endpoints : [
+        for assignment_key, assignment in endpoint.role_assignments : merge(assignment, {
+          pe_key = endpoint_key
+          key    = jsonencode([endpoint_key, assignment_key])
+        })
+      ]
+    ]) : assignment.key => assignment
+  }
 }
 
 # Build the Microsoft.Databricks/workspaces body.properties block.
