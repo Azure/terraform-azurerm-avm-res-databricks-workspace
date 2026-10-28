@@ -254,7 +254,7 @@ run "managed_endpoints_and_extensions" {
     condition = (
       length(azapi_resource.private_endpoint_role_assignments) == 1 &&
       length(data.azapi_resource_list.private_endpoint_role_definitions) == 0 &&
-      length(random_uuid.private_endpoint_role_assignments) == 0 &&
+      toset(keys(random_uuid.private_endpoint_role_assignments)) == toset([jsonencode(["ui", "reader"])]) &&
       azapi_resource.private_endpoint_role_assignments[jsonencode(["ui", "reader"])].name == var.private_endpoints["ui"].role_assignments["reader"].name &&
       azapi_resource.private_endpoint_role_assignments[jsonencode(["ui", "reader"])].parent_id == azurerm_private_endpoint.this["ui"].id &&
       azapi_resource.private_endpoint_role_assignments[jsonencode(["ui", "reader"])].type == var.resource_types.authorization_role_assignments &&
@@ -269,7 +269,7 @@ run "managed_endpoints_and_extensions" {
       contains(azapi_resource.private_endpoint_role_assignments[jsonencode(["ui", "reader"])].replace_triggers_refs, "properties.principalId") &&
       contains(azapi_resource.private_endpoint_role_assignments[jsonencode(["ui", "reader"])].replace_triggers_refs, "properties.roleDefinitionId")
     )
-    error_message = "Every authored role assignment property must reach the endpoint-scoped AzAPI extension without unnecessary lookups or UUIDs."
+    error_message = "Every authored role assignment property must reach the endpoint-scoped AzAPI extension without unnecessary lookups."
   }
 
   assert {
@@ -388,18 +388,19 @@ run "unmanaged_endpoints_and_extensions" {
   assert {
     condition = (
       length(azapi_resource.private_endpoint_role_assignments) == 2 &&
-      length(random_uuid.private_endpoint_role_assignments) == 1 &&
+      toset(keys(random_uuid.private_endpoint_role_assignments)) == toset([jsonencode(["auth", "reader"]), jsonencode(["auth", "explicit"])]) &&
       length(data.azapi_resource_list.private_endpoint_role_definitions) == 1 &&
       data.azapi_resource_list.private_endpoint_role_definitions[jsonencode(["auth", "reader"])].parent_id == azurerm_private_endpoint.this_unmanaged_dns_zone_groups["auth"].id &&
       data.azapi_resource_list.private_endpoint_role_definitions[jsonencode(["auth", "reader"])].query_parameters["$filter"] == tolist(["roleName eq 'Reader'"]) &&
       azapi_resource.private_endpoint_role_assignments[jsonencode(["auth", "reader"])].name == random_uuid.private_endpoint_role_assignments[jsonencode(["auth", "reader"])].result &&
+      azapi_resource.private_endpoint_role_assignments[jsonencode(["auth", "explicit"])].name == var.private_endpoints["auth"].role_assignments["explicit"].name &&
       azapi_resource.private_endpoint_role_assignments[jsonencode(["auth", "reader"])].parent_id == azurerm_private_endpoint.this_unmanaged_dns_zone_groups["auth"].id &&
       azapi_resource.private_endpoint_role_assignments[jsonencode(["auth", "reader"])].body.properties.roleDefinitionId == one(data.azapi_resource_list.private_endpoint_role_definitions[jsonencode(["auth", "reader"])].output.value).id &&
       azapi_resource.private_endpoint_role_assignments[jsonencode(["auth", "reader"])].body.properties.principalType == "ServicePrincipal" &&
       !contains(keys(azapi_resource.private_endpoint_role_assignments[jsonencode(["auth", "explicit"])].body.properties), "principalType") &&
       !contains(keys(azapi_resource.private_endpoint_role_assignments[jsonencode(["auth", "explicit"])].body.properties), "condition")
     )
-    error_message = "Unmanaged endpoint roles must resolve names at the correct scope, generate only omitted names, and honor principal-type defaults."
+    error_message = "Unmanaged endpoint roles must resolve names at the correct scope, select generated names only when omitted, and honor principal-type defaults."
   }
 
   assert {
