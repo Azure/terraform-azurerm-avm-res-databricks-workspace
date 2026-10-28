@@ -5,13 +5,11 @@ resource "terraform_data" "role_assignment_name" {
 module "workspace" {
   source = "../../../.."
 
-  enable_telemetry                        = false
-  location                                = "eastus"
-  name                                    = "unit-databricks"
-  private_endpoints_manage_dns_zone_group = var.manage_dns_zone_group
-  resource_group_name                     = "rg-unit"
-  sku                                     = "premium"
-
+  location            = "eastus"
+  name                = "unit-databricks"
+  resource_group_name = "rg-unit"
+  sku                 = "premium"
+  enable_telemetry    = false
   private_endpoints = {
     ui = {
       subnet_resource_id = "/subscriptions/00000000-0000-0000-0000-000000000003/resourceGroups/rg-network/providers/Microsoft.Network/virtualNetworks/unit/subnets/endpoints"
@@ -25,10 +23,7 @@ module "workspace" {
       }
     }
   }
-}
-
-variable "manage_dns_zone_group" {
-  type = bool
+  private_endpoints_manage_dns_zone_group = var.manage_dns_zone_group
 }
 
 output "private_endpoints" {
