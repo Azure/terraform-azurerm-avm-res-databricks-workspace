@@ -676,6 +676,28 @@ run "missing_role_definition_rejected" {
   expect_failures = [data.azapi_resource_list.private_endpoint_role_definitions]
 }
 
+run "cleanup_missing_role_definition" {
+  command   = apply
+  state_key = "missing_role_definition"
+  providers = {
+    azapi     = azapi
+    azurerm   = azurerm
+    random    = random
+    terraform = terraform
+  }
+  variables {
+    private_endpoints = {}
+  }
+  assert {
+    condition = (
+      length(azurerm_private_endpoint.this) == 0 &&
+      length(azapi_resource.private_endpoint_role_assignments) == 0 &&
+      length(random_uuid.private_endpoint_role_assignments) == 0
+    )
+    error_message = "The failed missing-role test must leave no endpoint role resources for teardown."
+  }
+}
+
 run "ambiguous_role_definition_rejected" {
   command   = apply
   state_key = "ambiguous_role_definition"
@@ -711,4 +733,26 @@ run "ambiguous_role_definition_rejected" {
     }
   }
   expect_failures = [data.azapi_resource_list.private_endpoint_role_definitions]
+}
+
+run "cleanup_ambiguous_role_definition" {
+  command   = apply
+  state_key = "ambiguous_role_definition"
+  providers = {
+    azapi     = azapi
+    azurerm   = azurerm
+    random    = random
+    terraform = terraform
+  }
+  variables {
+    private_endpoints = {}
+  }
+  assert {
+    condition = (
+      length(azurerm_private_endpoint.this) == 0 &&
+      length(azapi_resource.private_endpoint_role_assignments) == 0 &&
+      length(random_uuid.private_endpoint_role_assignments) == 0
+    )
+    error_message = "The failed ambiguous-role test must leave no endpoint role resources for teardown."
+  }
 }
