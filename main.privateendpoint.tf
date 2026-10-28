@@ -103,10 +103,7 @@ data "azapi_resource_list" "private_endpoint_role_definitions" {
 }
 
 resource "random_uuid" "private_endpoint_role_assignments" {
-  for_each = {
-    for key, assignment in local.private_endpoint_role_assignments : key => assignment
-    if assignment.name == null
-  }
+  for_each = local.private_endpoint_role_assignments
 }
 
 resource "azapi_resource" "private_endpoint_role_assignments" {
