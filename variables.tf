@@ -273,7 +273,7 @@ Enhanced Security and Compliance configuration for the Databricks Workspace. Thi
   DESCRIPTION
 
   validation {
-    condition = var.enhanced_security_compliance == null || (
+    condition = var.enhanced_security_compliance == null ? true : (
       var.enhanced_security_compliance.compliance_security_profile_enabled == false ||
       (var.enhanced_security_compliance.automatic_cluster_update_enabled == true &&
       var.enhanced_security_compliance.enhanced_security_monitoring_enabled == true)
@@ -281,14 +281,14 @@ Enhanced Security and Compliance configuration for the Databricks Workspace. Thi
     error_message = "When compliance_security_profile_enabled is true, both automatic_cluster_update_enabled and enhanced_security_monitoring_enabled must be set to true."
   }
   validation {
-    condition = var.enhanced_security_compliance == null || (
+    condition = var.enhanced_security_compliance == null ? true : (
       var.enhanced_security_compliance.compliance_security_profile_enabled == true ||
       length(var.enhanced_security_compliance.compliance_security_profile_standards) == 0
     )
     error_message = "compliance_security_profile_standards can only be set when compliance_security_profile_enabled is true."
   }
   validation {
-    condition = var.enhanced_security_compliance == null || alltrue([
+    condition = var.enhanced_security_compliance == null ? true : alltrue([
       for standard in var.enhanced_security_compliance.compliance_security_profile_standards :
       contains(["HIPAA", "PCI_DSS", "HITRUST", "IRAP_PROTECTED", "UK_CYBER_ESSENTIALS_PLUS", "CANADA_PROTECTED_B", "NONE"], standard)
     ])

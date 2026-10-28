@@ -10,7 +10,7 @@ This example shows how to deploy the databricks module with customer managed key
 
 ```hcl
 terraform {
-  required_version = ">= 1.6, < 2.0"
+  required_version = ">= 1.11, < 2.0"
 
   required_providers {
     azuread = {
@@ -218,7 +218,7 @@ resource "azurerm_role_assignment" "storage_account" {
 
 The following requirements are needed by this module:
 
-- <a name="requirement_terraform"></a> [terraform](#requirement\_terraform) (>= 1.6, < 2.0)
+- <a name="requirement_terraform"></a> [terraform](#requirement\_terraform) (>= 1.11, < 2.0)
 
 - <a name="requirement_azuread"></a> [azuread](#requirement\_azuread) (>= 2.15.0)
 
